@@ -1,0 +1,23 @@
+# [OPS] Executive Artifact Deployment System — .gitignore
+
+# Credentials — never commit
+system/.env.deploy
+.env
+.env.*
+!system/.env.deploy.example
+
+# Vercel
+.vercel/
+.vercel-output/
+
+# Logs
+deployed/*.log
+artifacts/**/deployed/*.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/

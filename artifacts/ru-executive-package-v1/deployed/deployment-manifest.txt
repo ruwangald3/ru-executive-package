@@ -1,0 +1,18 @@
+ARTIFACT MANIFEST
+generated: 2026-05-19T17:06:26+00:00
+root: /sessions/zealous-optimistic-allen/mnt/[OPS] Executive Artifact Deployment System/artifacts/ru-executive-package-v1/versions/sivers-custom-v1
+
+FILES:
+  README.md  (5850 bytes)
+  assets/ai-engage.png  (6328 bytes)
+  assets/filps.png  (8040 bytes)
+  assets/nokia.png  (36524 bytes)
+  assets/profile.jpg  (140091 bytes)
+  assets/semtech.png  (3594 bytes)
+  assets/siemens.png  (19898 bytes)
+  assets/spark.png  (15465 bytes)
+  assets/ti-video-thumb.jpg  (216484 bytes)
+  assets/ti.png  (15829 bytes)
+  index.html  (18220 bytes)
+  styles.css  (34647 bytes)
+  vercel.json  (672 bytes)

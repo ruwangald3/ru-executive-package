@@ -1,0 +1,13 @@
+DEPLOYMENT NOTES
+================
+artifact:    ru-executive-package-v1
+version:     sivers-custom-v1
+project:     ru-executive-package
+commit:      unknown
+pushed:      no
+deployed:    2026-05-19T17:06:26+00:00
+url:         NOT-CAPTURED
+log:         /sessions/zealous-optimistic-allen/mnt/[OPS] Executive Artifact Deployment System/artifacts/ru-executive-package-v1/deployed/deploy-sivers-custom-v1-20260519-170624.log
+
+Production:  not-deployed
+Mobile QA:   N/A
