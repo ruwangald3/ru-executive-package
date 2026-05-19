@@ -1,0 +1,5 @@
+slug:    ru-executive-package-v1
+version: sivers-custom-v1
+url:     https://ru-executive-package-v1.vercel.app
+commit:  94e2d1d5b65537807554b9dfd9489ae982905653
+ts:      2026-05-19T20:34:26+00:00

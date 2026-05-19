@@ -1,0 +1,5 @@
+slug:    veyra-systems-team-vision
+version: v1-draft
+url:     https://veyra-systems-team-vision.vercel.app
+commit:  94e2d1d5b65537807554b9dfd9489ae982905653
+ts:      2026-05-19T20:34:41+00:00
