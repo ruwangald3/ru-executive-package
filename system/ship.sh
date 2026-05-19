@@ -188,28 +188,25 @@ if [ "$VERCEL_REACHABLE" = "yes" ] && [ -n "${VERCEL_TOKEN:-}" ]; then
 elif [ "$PUSHED" = "yes" ]; then
   DEPLOY_MODE="github-webhook"
   log "[ship] vercel.com not reachable — relying on GitHub->Vercel webhook"
-  # Try to poll api.github.com for the Vercel deployment URL (often blocked, but cheap to try)
-  TRIES=12
-  while [ $TRIES -gt 0 ]; do
-    sleep 5
-    resp=$(curl -sS --connect-timeout 3 --max-time 8 \
-              -H "Authorization: token $GITHUB_TOKEN" \
-              -H "Accept: application/vnd.github+json" \
-              "https://api.github.com/repos/${GITHUB_REPO}/commits/${COMMIT_SHA}/check-runs?per_page=30" 2>/dev/null)
-    vurl=$(echo "$resp" | grep -oE 'https://[a-zA-Z0-9.-]+\.vercel\.app[^"]*' | head -1)
-    if [ -n "$vurl" ]; then URL="$vurl"; break; fi
-    TRIES=$((TRIES-1))
-  done
+  # Quick probe: is api.github.com reachable at all? If 000/403, skip polling entirely.
+  probe_code=$(curl -sS -o /dev/null -w "%{http_code}" --connect-timeout 3 --max-time 6 \
+                 -H "Authorization: token $GITHUB_TOKEN" \
+                 https://api.github.com/user 2>/dev/null || echo 000)
+  if [ "$probe_code" = "200" ]; then
+    log "[ship] api.github.com reachable — polling for Vercel URL"
+    TRIES=12
+    while [ $TRIES -gt 0 ]; do
+      sleep 5
+      resp=$(curl -sS --connect-timeout 3 --max-time 8 \
+                -H "Authorization: token $GITHUB_TOKEN" \
+                -H "Accept: application/vnd.github+json" \
+                "https://api.github.com/repos/${GITHUB_REPO}/commits/${COMMIT_SHA}/check-runs?per_page=30" 2>/dev/null)
+      vurl=$(echo "$resp" | grep -oE 'https://[a-zA-Z0-9.-]+\.vercel\.app[^"]*' | head -1)
+      if [ -n "$vurl" ]; then URL="$vurl"; break; fi
+      TRIES=$((TRIES-1))
+    done
+  else
+    log "[ship] api.github.com proxy-blocked (HTTP $probe_code) — skipping poll"
+  fi
   [ -z "$URL" ] && log "[ship] could not poll Vercel URL (api.github.com likely blocked)"
-  [ -z "$URL" ] && URL="https://${PROJECT}.vercel.app"  # best-guess primary alias
-  [ -z "$URL" ] || log "[ship] presumed URL: $URL (verify in browser)"
-else
-  log "[ship] BLOCKED: vercel.com unreachable AND no GitHub push completed"
-fi
-
-# ---- Phase 5 — record
-log; log ">>> Phase 5 — RECORD"
-{
-  echo "DEPLOYMENT NOTES — $CASE_NAME / $VERSION_NAME"
-  echo "================================================================"
-  echo 
+  [ 
