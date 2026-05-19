@@ -1,0 +1,9 @@
+ARTIFACT MANIFEST
+generated: 2026-05-19T20:17:13+00:00
+root: /sessions/zealous-optimistic-allen/mnt/[OPS] Executive Artifact Deployment System/artifacts/veyra-systems-team-vision/versions/v1-draft
+
+FILES:
+  README.md  (777 bytes)
+  index.html  (375430 bytes)
+  styles.css  (1949 bytes)
+  vercel.json  (456 bytes)

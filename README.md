@@ -175,16 +175,14 @@ half-page mobile render, logo render, white-outline artifacts.
 
 ---
 
-## Maintenance
+## Session continuity — `/handover`
 
-- The `system/` folder is the only place to edit reusable logic.
-- Never write per-artifact logic into `system/`.
-- Bump `SKILL.md` when invocation contract changes.
-- Treat scripts as production code — keep them idempotent and non-destructive.
+This project hosts the canonical implementation of the **Executive Session
+Handover Protocol** — an Enspire-wide pattern for handing operational
+work between Claude sessions with zero re-explanation.
 
----
+Trigger any of: `/handover`, `session handover`, `create handover`,
+`snapshot project state`, `summarize for next session`.
 
-## Classification
-
-**[OPS]** — operational execution system, reused across all executive artifacts.
-Owns: artifact validation, pack
+```bash
+./system/handover.sh --writ
