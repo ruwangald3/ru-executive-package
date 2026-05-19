@@ -37,7 +37,7 @@ TS="$(date +%Y%m%d-%H%M%S)"
 mkdir -p "$CASE_DIR/deployed" "$CASE_DIR/qa" "$CASE_DIR/pdf"
 LOG="$CASE_DIR/deployed/deploy-${VERSION_NAME}-${TS}.log"
 NOTES="$CASE_DIR/deployed/deployment-notes.txt"
-REL_ART_PATH="${ART_ROOT#$PROJECT_ROOT/}"
+REL_ART_PATH="$(realpath --relative-to="$PROJECT_ROOT" "$ART_ROOT")"
 
 log(){ printf "%s\n" "$*" | tee -a "$LOG"; }
 
