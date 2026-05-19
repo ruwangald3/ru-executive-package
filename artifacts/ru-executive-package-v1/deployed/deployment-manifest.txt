@@ -1,5 +1,5 @@
 ARTIFACT MANIFEST
-generated: 2026-05-19T17:14:04+00:00
+generated: 2026-05-19T17:27:22+00:00
 root: /sessions/zealous-optimistic-allen/mnt/[OPS] Executive Artifact Deployment System/artifacts/ru-executive-package-v1/versions/sivers-custom-v1
 
 FILES:
