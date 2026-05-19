@@ -70,7 +70,7 @@ else
   [ -z "$TARGET" ] && { echo "ERROR: no deployable versions found under $VERSIONS_DIR" >&2; exit 2; }
 fi
 
-REL_TARGET="${TARGET#$PROJECT_ROOT/}"
+REL_TARGET="$(realpath --relative-to="$PROJECT_ROOT" "$TARGET")"
 echo "[ship-cmd] artifact: $SLUG"
 echo "[ship-cmd] version : $(basename "$TARGET")"
 echo "[ship-cmd] target  : $REL_TARGET"
