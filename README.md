@@ -82,7 +82,32 @@ The script will:
 
 ## Invoking deployment
 
-### Option A — local CLI (recommended)
+**`/ship <slug>` is the canonical command.** Fully autonomous after one-time
+`VERCEL_TOKEN` setup. No `/vercel-create`, no manual project import per
+artifact — the GitHub Action handles Vercel project creation on first deploy.
+
+```
+/ship veyra-systems-team-vision
+/ship sivers-resume-v2 --prod
+/ship ai-engage-investor-brief --version v3-refined --prod
+```
+
+Shell equivalents:
+
+```bash
+./system/ship veyra-systems-team-vision --prod
+./system/ship-cmd.sh sivers-resume --version v2 --prod
+```
+
+Pipeline (autonomous):
+
+1. Cowork resolves slug → version → validates → pushes to GitHub
+2. `.github/workflows/deploy.yml` fires → auto-creates Vercel project named `<slug>` if missing → deploys → commits live URL back to `artifacts/<slug>/deployed/url.txt`
+3. Cowork fetches the commit, reads the URL, returns it
+
+End-to-end: ~30–90s. Contract: `system/ship-skill/SKILL.md`
+
+### Option B — full-path invocation (legacy)
 
 ```bash
 export VERCEL_TOKEN=<your-token>           # one-time
@@ -91,12 +116,12 @@ export VERCEL_TOKEN=<your-token>           # one-time
 
 Token source: <https://vercel.com/account/tokens>
 
-### Option B — Claude / Cowork chat command
+### Option C — Claude / Cowork chat command (natural language)
 
 Tell Claude: **"Ship this to Vercel"** while focused on an artifact folder.
 Claude follows the contract in `SKILL.md` — validate, package, deploy, record.
 
-### Option C — fully manual (fallback)
+### Option D — fully manual (fallback)
 
 1. `cd artifacts/<name>/versions/<v>`
 2. `npx vercel deploy --prod`
@@ -166,23 +191,4 @@ half-page mobile render, logo render, white-outline artifacts.
 | Capability       | Today                              | Future |
 |------------------|------------------------------------|--------|
 | GitHub           | local git → manual `git push`      | Auto-create repo + push via PAT |
-| Vercel deploy    | local CLI with `VERCEL_TOKEN`      | Vercel API direct (no CLI) |
-| Custom domains   | configured manually in Vercel UI   | Domain assignment via API |
-| Analytics        | not wired                          | PostHog / Vercel Analytics |
-| Version archive  | `archive.sh`                       | Auto-snapshot on each deploy |
-| PDF generation   | manual (Chrome → Save as PDF)      | Playwright headless render |
-| Rollback         | switch alias to prior deploy URL   | One-command rollback in ship.sh |
-
----
-
-## Session continuity — `/handover`
-
-This project hosts the canonical implementation of the **Executive Session
-Handover Protocol** — an Enspire-wide pattern for handing operational
-work between Claude sessions with zero re-explanation.
-
-Trigger any of: `/handover`, `session handover`, `create handover`,
-`snapshot project state`, `summarize for next session`.
-
-```bash
-./system/handover.sh --writ
+| Vercel deploy    | local C
