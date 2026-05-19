@@ -1,0 +1,110 @@
+# ----------------------------------------------------------------------------
+# [OPS] Executive Artifact Deployment System — Autonomous Vercel Deploy
+# Trigger: every push to main that touches artifacts/*/versions/*/
+# On push, deploys each changed artifact to Vercel, commits URL back.
+# Required secret: VERCEL_TOKEN
+# ----------------------------------------------------------------------------
+name: ship-to-vercel
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'artifacts/**'
+      - '.github/workflows/deploy.yml'
+
+concurrency:
+  group: ship-to-vercel
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    if: "!contains(github.event.head_commit.message, '[skip ci]')"
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Vercel CLI
+        run: npm i -g vercel@latest
+
+      - name: Detect changed artifact versions
+        id: detect
+        run: |
+          set -e
+          changed=$(git diff --name-only HEAD^..HEAD 2>/dev/null \
+            | grep -E '^artifacts/[^/]+/versions/[^/]+/' \
+            | awk -F/ '{print $1"/"$2"/"$3"/"$4}' \
+            | sort -u || true)
+          # On first run (initial workflow commit), no previous artifact diff
+          # — fall back to deploying all current artifacts.
+          if [ -z "$changed" ]; then
+            changed=$(find artifacts -mindepth 3 -maxdepth 3 -type d 2>/dev/null \
+              | grep -v '_archive-' | grep -v 'sivers-executive-packet-v1' \
+              | sort -u || true)
+          fi
+          if [ -z "$changed" ]; then
+            echo "no artifacts to deploy"
+            echo "changed=" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          echo "deploying:"
+          echo "$changed"
+          {
+            echo "changed<<EOF"
+            echo "$changed"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Deploy each changed artifact
+        if: steps.detect.outputs.changed != ''
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: |
+          set -e
+          if [ -z "$VERCEL_TOKEN" ]; then
+            echo "::error::VERCEL_TOKEN secret not set at https://github.com/${{ github.repository }}/settings/secrets/actions"
+            exit 1
+          fi
+          while IFS= read -r dir; do
+            [ -z "$dir" ] && continue
+            slug=$(echo "$dir" | awk -F/ '{print $2}')
+            version=$(echo "$dir" | awk -F/ '{print $4}')
+            echo "::group::Deploy $slug / $version"
+            cd "$GITHUB_WORKSPACE/$dir"
+            URL=$(vercel deploy --prod --yes --token "$VERCEL_TOKEN" --name "$slug" 2>&1 | tee /tmp/vercel.log | grep -oE 'https://[a-zA-Z0-9.-]+\.vercel\.app[^[:space:]]*' | tail -1)
+            echo "URL: $URL"
+            cd "$GITHUB_WORKSPACE"
+            mkdir -p "artifacts/$slug/deployed"
+            echo "$URL" > "artifacts/$slug/deployed/url.txt"
+            {
+              echo "slug:    $slug"
+              echo "version: $version"
+              echo "url:     $URL"
+              echo "commit:  ${GITHUB_SHA}"
+              echo "ts:      $(date -Iseconds)"
+            } > "artifacts/$slug/deployed/last-deploy.txt"
+            echo "::endgroup::"
+          done <<< "${{ steps.detect.outputs.changed }}"
+
+      - name: Commit URLs back
+        if: steps.detect.outputs.changed != ''
+        run: |
+          if [ -z "$(git status --porcelain artifacts/*/deployed/ 2>/dev/null)" ]; then
+            exit 0
+          fi
+          git config user.email "actions@github.com"
+          git config user.name  "ship-to-vercel"
+          git add artifacts/*/deployed/url.txt artifacts/*/deployed/last-deploy.txt 2>/dev/null || true
+          git commit -m "ci: record deploy URLs [skip ci]"
+          git push origin main
