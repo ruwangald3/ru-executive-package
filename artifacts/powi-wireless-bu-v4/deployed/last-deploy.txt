@@ -1,5 +1,5 @@
 slug:    powi-wireless-bu-v4
 version: v1
 url:     https://powi-wireless-bu-v4.vercel.app
-commit:  07ae96f97a2bdf6efb8e78a663e7251d42e75d6f
-ts:      2026-05-20T02:58:34+00:00
+commit:  49e5ec4959f50a6e316342547315d8e1c8d8d7c8
+ts:      2026-05-20T03:46:26+00:00
