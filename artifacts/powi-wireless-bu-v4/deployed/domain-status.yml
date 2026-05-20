@@ -1,0 +1,30 @@
+# Pre-staged by /ship + custom-domain wiring.
+# Re-run system/setup-custom-domain.sh powi to refresh after DNS setup.
+
+buyer:           powi
+artifact:        powi-wireless-bu-v4
+vercel_project:  powi-wireless-bu-v4
+
+# URLs
+canonical_url:   https://powi.sparkconnected.com    # PRIMARY — share this
+vercel_url:      https://powi-wireless-bu-v4.vercel.app   # current live, backup
+custom_domain:   powi.sparkconnected.com
+
+# Status
+setup_status:    pending-script-run    # verified after setup-custom-domain.sh powi
+dns_status:      pending-record-add    # propagated after CNAME added at DNS provider
+configured_at:   2026-05-20
+
+dns_records_required:
+  - type:   CNAME
+    name:   powi
+    value:  cname.vercel-dns.com
+    ttl:    300
+    notes:  Add at the DNS provider managing sparkconnected.com
+
+operator_steps:
+  1: Set VERCEL_TOKEN in system/.env.deploy
+  2: Run ./system/setup-custom-domain.sh powi
+  3: Add the CNAME record above at your DNS provider
+  4: Wait 5-30 min for propagation
+  5: Open https://powi.sparkconnected.com in browser

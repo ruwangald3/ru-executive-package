@@ -1,0 +1,28 @@
+{
+  "$comment": "Reusable buyer-domain registry. Maps buyer slug -> sparkconnected.com subdomain -> Vercel project. Consumed by system/setup-custom-domain.sh.",
+  "base_domain": "sparkconnected.com",
+  "default_vercel_target": "cname.vercel-dns.com",
+  "buyers": {
+    "powi": {
+      "artifact": "powi-wireless-bu-v4",
+      "subdomain": "powi.sparkconnected.com",
+      "vercel_project": "powi-wireless-bu-v4",
+      "vercel_url": "https://powi-wireless-bu-v4.vercel.app",
+      "preferred_project_name": "spark-powi-bu",
+      "status": "deployed-pending-domain",
+      "notes": "Mike Balow engagement, May 2026 — wireless BU pitch to Powi SVP Eng. Vercel auto-named project after slug; rename to spark-powi-bu in Vercel dashboard for naming consistency (optional)."
+    },
+    "navitas": {
+      "artifact": "spark-navitas-strategic-opportunity",
+      "subdomain": "navitas.sparkconnected.com",
+      "vercel_project": "spark-navitas-bu",
+      "vercel_url": "https://spark-navitas-bu.vercel.app",
+      "status": "reserved",
+      "notes": "Chris Allexandre engagement, prior — asset acquisition pitch"
+    },
+    "renesas":  { "artifact": null, "subdomain": "renesas.sparkconnected.com",  "vercel_project": "spark-renesas-bu",  "vercel_url": "https://spark-renesas-bu.vercel.app",  "status": "reserved", "notes": "Reserved" },
+    "infineon": { "artifact": null, "subdomain": "infineon.sparkconnected.com", "vercel_project": "spark-infineon-bu", "vercel_url": "https://spark-infineon-bu.vercel.app", "status": "reserved", "notes": "Reserved" },
+    "onsemi":   { "artifact": null, "subdomain": "onsemi.sparkconnected.com",   "vercel_project": "spark-onsemi-bu",   "vercel_url": "https://spark-onsemi-bu.vercel.app",   "status": "reserved", "notes": "Reserved" },
+    "ti":       { "artifact": null, "subdomain": "ti.sparkconnected.com",       "vercel_project": "spark-ti-bu",       "vercel_url": "https://spark-ti-bu.vercel.app",       "status": "reserved", "notes": "Reserved" }
+  }
+}

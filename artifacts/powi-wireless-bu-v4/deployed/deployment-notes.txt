@@ -1,11 +1,164 @@
 DEPLOYMENT NOTES — powi-wireless-bu-v4 / v1
 ================================================================
-artifact:     powi-wireless-bu-v4
-version:      v1
-project:      ru-executive-package
-github repo:  https://github.com/ruwangald3/ru-executive-package
-deploy mode:  github-webhook (Vercel)
+artifact:        powi-wireless-bu-v4
+version:         v1
+buyer:           powi
+project:         powi-wireless-bu-v4   (Vercel auto-named; rename optional)
+github repo:     https://github.com/ruwangald3/ru-executive-package
+commit:          07ae96f97a2bdf6efb8e78a663e7251d42e75d6f
+pushed:          yes
+deploy mode:     github-webhook (Vercel)
+deployed:        2026-05-20T02:58:34Z
 
-One-time Vercel setup (if new project):
-  vercel.com/new -> import ruwangald3/ru-executive-package
-  Root Directory: artifacts/powi-wireless-bu-v4/versions/v1
+================================================================
+SHARE URLS
+================================================================
+
+canonical_url:   https://powi.sparkconnected.com           [PRIMARY — share this]
+vercel_url:      https://powi-wireless-bu-v4.vercel.app    [live now, backup]
+custom_domain:   powi.sparkconnected.com
+dns_status:      pending-record-add
+setup_status:    pending-script-run
+
+================================================================
+FINAL SHARE URL — LIVE AFTER DNS PROPAGATION
+================================================================
+
+  https://powi.sparkconnected.com
+
+  Once DNS resolves (5-30 min after CNAME added), Vercel auto-issues
+  a Let's Encrypt cert and the URL serves V4 live.
+
+  Until then, the deck is already live at:
+  https://powi-wireless-bu-v4.vercel.app
+
+================================================================
+DNS RECORDS REQUIRED
+================================================================
+
+  At the DNS provider managing sparkconnected.com:
+
+    Type:  CNAME
+    Name:  powi
+    Value: cname.vercel-dns.com
+    TTL:   300
+
+  Cloudflare users: proxy status MUST be "DNS only" (gray cloud).
+  Orange-cloud proxy breaks Vercel's SSL.
+
+================================================================
+WHERE TO CONFIGURE DNS
+================================================================
+
+  1. Find your provider:
+       dig +short NS sparkconnected.com
+
+  2. Provider-specific steps in:
+       system/CUSTOM_DOMAIN_PLAYBOOK.md (sections 4 + 5)
+
+  3. Vercel domain attachment (one-time per buyer):
+       Run on your local machine (not sandbox):
+       ./system/setup-custom-domain.sh powi
+
+       Requires VERCEL_TOKEN in system/.env.deploy
+
+================================================================
+VERIFICATION STEPS
+================================================================
+
+  After DNS record + script run, in order:
+
+  1. DNS resolved?
+       dig +short powi.sparkconnected.com
+       expect: cname.vercel-dns.com.
+
+  2. HTTPS reachable + cert issued?
+       curl -sI https://powi.sparkconnected.com | head -3
+       expect: HTTP/2 200
+
+  3. Deck loads correctly?
+       Open https://powi.sparkconnected.com in browser
+       Confirm V4 hero slide renders + sliding highlight animates
+
+  4. Mobile + tablet check:
+       Open on iPhone, iPad — confirm no overflow
+
+  5. PDF export check:
+       Cmd-P / Ctrl-P → Save as PDF, backgrounds ON, no margin
+
+================================================================
+REMAINING ACCOUNT-LEVEL ACTIONS (operator only)
+================================================================
+
+  ☐ 1. Get Vercel API token
+         https://vercel.com/account/tokens → Create token (no expiry, or 1yr)
+         Set in: system/.env.deploy → VERCEL_TOKEN=<token>
+
+  ☐ 2. (Optional) Rename Vercel project from "powi-wireless-bu-v4"
+         to "spark-powi-bu" for naming consistency
+         Vercel dashboard → project Settings → General → Project Name
+         If renamed, update system/domain-registry.json:
+           "vercel_project": "spark-powi-bu"
+           "vercel_url":     "https://spark-powi-bu.vercel.app"
+
+  ☐ 3. Run domain-attach script (LOCAL machine, not sandbox)
+         cd "[OPS] Executive Artifact Deployment System"
+         ./system/setup-custom-domain.sh powi
+
+         Sandbox proxy blocks api.vercel.com — script must run on
+         your Windows/macOS/Linux box where outbound HTTPS works.
+
+  ☐ 4. Add CNAME record at sparkconnected.com DNS provider
+         Type: CNAME, Name: powi, Value: cname.vercel-dns.com, TTL: 300
+
+  ☐ 5. Verify chain — DNS + cert + page (steps above)
+
+  ☐ 6. Set powi.sparkconnected.com as primary domain in Vercel
+         Vercel project → Settings → Domains → "Set as Primary"
+
+================================================================
+ARTIFACT MANIFEST
+================================================================
+
+  artifacts/powi-wireless-bu-v4/
+  ├── deployed/
+  │   ├── deployment-notes.txt    (this file)
+  │   ├── domain-status.yml       (structured metadata)
+  │   ├── url.txt                 (live Vercel URL)
+  │   └── last-deploy.txt         (deploy log)
+  ├── pdf/
+  ├── qa/
+  ├── screenshots/
+  └── versions/v1/
+      ├── index.html       (V4 deck · 70 KB · 10 slides)
+      ├── vercel.json
+      └── README.md
+
+================================================================
+REUSABLE FOR FUTURE BUYER URLs
+================================================================
+
+  Registered in system/domain-registry.json:
+
+    powi      → powi.sparkconnected.com       [DEPLOYED, pending DNS]
+    navitas   → navitas.sparkconnected.com    [reserved]
+    renesas   → renesas.sparkconnected.com    [reserved]
+    infineon  → infineon.sparkconnected.com   [reserved]
+    onsemi    → onsemi.sparkconnected.com     [reserved]
+    ti        → ti.sparkconnected.com         [reserved]
+
+  Same 4-step flow for any new buyer:
+    1. Edit system/domain-registry.json (add buyer block)
+    2. Ship artifact via /ship <artifact-slug>
+    3. Run ./system/setup-custom-domain.sh <buyer-slug>
+    4. Add CNAME at DNS provider
+
+  Full playbook: system/CUSTOM_DOMAIN_PLAYBOOK.md
+
+================================================================
+DEPENDENCIES (external, CDN-loaded by deck)
+================================================================
+
+  - Google Fonts (Inter, JetBrains Mono, Cormorant Garamond)
+  - 5 Powi product chip images from www.power.com
+    Fallback: text placeholders via <img onerror>
