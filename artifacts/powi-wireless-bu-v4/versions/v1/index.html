@@ -1,0 +1,818 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Wireless Power BU · Spark → Power Integrations</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://www.power.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&family=Cormorant+Garamond:ital,wght@1,300;1,400;1,500&display=swap" rel="stylesheet">
+<style>
+:root{
+  color-scheme:dark;
+  --ink:#070A12;--ink-2:#0C111C;--ink-3:#121829;--surface:#161D31;
+  --paper:#E8ECF3;--paper-mute:rgba(232,236,243,0.62);--paper-fade:rgba(232,236,243,0.38);--paper-trace:rgba(232,236,243,0.18);
+  --hairline:rgba(232,236,243,0.08);--hairline-2:rgba(232,236,243,0.14);
+  --cyan:#5BE0FF;--cyan-2:#2BB4D6;--cyan-dim:rgba(91,224,255,0.22);--cyan-glow:rgba(91,224,255,0.45);
+  --amber:#F5B027;--amber-dim:rgba(245,176,39,0.22);--amber-glow:rgba(245,176,39,0.40);
+  --red:#FF5A5F;--green:#4ec491;--gray:#8B92A3;
+  --font-sans:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  --font-mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  --font-serif:"Cormorant Garamond",Georgia,serif;
+  --ease:cubic-bezier(0.16,1,0.3,1);
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;background:#000;color:var(--paper);font-family:var(--font-sans);-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;font-size:14px;line-height:1.5}
+html{scroll-behavior:smooth;scroll-snap-type:y mandatory;height:100%;overflow-y:scroll}
+body{height:100%}
+.topbar{position:fixed;top:0;left:0;right:0;z-index:50;padding:18px 36px;display:flex;justify-content:space-between;align-items:center;pointer-events:none;background:linear-gradient(180deg,rgba(7,10,18,0.92),rgba(7,10,18,0));backdrop-filter:blur(6px)}
+.topbar > *{pointer-events:auto}
+.brand{display:flex;align-items:center;gap:18px;font-family:var(--font-mono);font-size:10.5px;letter-spacing:0.22em;text-transform:uppercase;color:var(--paper-fade)}
+.brand .dot{width:6px;height:6px;background:var(--cyan);border-radius:50%;box-shadow:0 0 12px var(--cyan-glow);animation:pulse 2.6s ease-in-out infinite}
+.brand b{color:var(--cyan);font-weight:500}
+.classifier{font-family:var(--font-mono);font-size:10px;letter-spacing:0.24em;text-transform:uppercase;color:var(--paper-fade)}
+.classifier b{color:var(--amber);font-weight:500}
+.dots{position:fixed;right:28px;top:50%;transform:translateY(-50%);z-index:50;display:flex;flex-direction:column;gap:14px}
+.dots a{width:8px;height:8px;border-radius:50%;background:var(--paper-trace);border:1px solid var(--hairline-2);transition:all .35s var(--ease);position:relative}
+.dots a.active{background:var(--cyan);box-shadow:0 0 14px var(--cyan-glow);border-color:var(--cyan)}
+.dots a:hover{background:var(--cyan-2)}
+.dots a::after{content:attr(data-label);position:absolute;right:18px;top:50%;transform:translateY(-50%);font-family:var(--font-mono);font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:var(--paper-fade);white-space:nowrap;opacity:0;transition:opacity .25s var(--ease);pointer-events:none}
+.dots a:hover::after,.dots a.active::after{opacity:1}
+.kbhint{position:fixed;bottom:18px;left:36px;z-index:50;font-family:var(--font-mono);font-size:9.5px;letter-spacing:0.22em;text-transform:uppercase;color:var(--paper-fade);display:flex;align-items:center;gap:10px;opacity:0.7}
+.kbkey{padding:2px 7px;border:1px solid var(--hairline-2);border-radius:3px;color:var(--paper-mute)}
+.slide{min-height:100vh;scroll-snap-align:start;display:flex;flex-direction:column;justify-content:center;padding:96px 64px 64px;position:relative;overflow:hidden}
+.slide > .grid-bg{position:absolute;inset:0;pointer-events:none;background:linear-gradient(rgba(91,224,255,0.025) 1px,transparent 1px) 0 0/64px 64px,linear-gradient(90deg,rgba(91,224,255,0.025) 1px,transparent 1px) 0 0/64px 64px,radial-gradient(40% 30% at 90% 8%,rgba(91,224,255,0.07),transparent 70%),radial-gradient(30% 28% at 5% 95%,rgba(245,176,39,0.05),transparent 70%),var(--ink)}
+.slide > .content{position:relative;z-index:2;max-width:1320px;margin:0 auto;width:100%}
+.eyebrow{display:inline-flex;align-items:center;gap:14px;font-family:var(--font-mono);font-size:11px;font-weight:500;letter-spacing:0.24em;text-transform:uppercase;color:var(--cyan)}
+.eyebrow::before{content:"";width:36px;height:1px;background:var(--cyan)}
+.eyebrow .conservative{background:var(--amber);color:var(--ink);padding:2px 9px;border-radius:2px;font-weight:700;letter-spacing:0.18em;box-shadow:0 0 14px var(--amber-glow)}
+.slide h1{font-size:clamp(36px,5.2vw,72px);font-weight:700;line-height:1.02;letter-spacing:-0.03em;margin:22px 0 0;color:var(--paper)}
+.slide h2{font-size:clamp(28px,3.6vw,46px);font-weight:600;line-height:1.08;letter-spacing:-0.022em;margin:18px 0 0;color:var(--paper)}
+.slide .lede{font-family:var(--font-serif);font-style:italic;font-weight:400;font-size:clamp(18px,1.6vw,22px);line-height:1.45;color:var(--paper-mute);max-width:820px;margin-top:18px}
+.italic-accent{font-style:italic;font-family:var(--font-serif);color:var(--cyan);font-weight:400}
+.hl{position:relative;display:inline-block;z-index:0;white-space:nowrap}
+.hl::before{content:"";position:absolute;left:-8px;right:-8px;bottom:4%;height:46%;background:var(--amber);opacity:0;z-index:-1;transform:scaleX(0);transform-origin:left;transition:transform 1.35s cubic-bezier(0.22,1,0.36,1) 0.5s,opacity 0.5s var(--ease) 0.55s;border-radius:3px;box-shadow:0 0 20px rgba(245,176,39,0.42)}
+.reveal.in .hl::before{opacity:0.46;transform:scaleX(1)}
+.hl::after{content:"";position:absolute;left:-8px;bottom:4%;width:4px;height:46%;background:var(--amber);box-shadow:0 0 18px var(--amber),0 0 32px rgba(245,176,39,0.6);opacity:0;z-index:0;border-radius:2px;transform:translateX(0);transition:none}
+.reveal.in .hl::after{animation:hl-tip 1.35s cubic-bezier(0.22,1,0.36,1) 0.5s forwards}
+@keyframes hl-tip{0%{opacity:1;transform:translateX(0)}90%{opacity:1}100%{opacity:0;transform:translateX(calc(100% + 8px))}}
+.hero{padding-top:120px}
+.hero .mesh{position:absolute;inset:0;pointer-events:none;z-index:1;overflow:hidden}
+.hero .mesh::before,.hero .mesh::after{content:"";position:absolute;border-radius:50%;filter:blur(80px);opacity:0.55;animation:drift 22s ease-in-out infinite alternate}
+.hero .mesh::before{width:740px;height:740px;background:radial-gradient(circle,rgba(91,224,255,0.42),transparent 65%);top:-200px;right:-120px}
+.hero .mesh::after{width:580px;height:580px;background:radial-gradient(circle,rgba(245,176,39,0.32),transparent 65%);bottom:-180px;left:-100px;animation-delay:-8s}
+.hero .scanline{position:absolute;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--cyan),transparent);opacity:0.5;animation:scan 6s linear infinite;z-index:2}
+.hero h1{font-size:clamp(44px,6.4vw,96px);max-width:1180px;line-height:1.04}
+.hero h1 .accent{color:var(--cyan);font-style:italic;font-family:var(--font-serif);font-weight:400}
+.hero .sub{margin-top:48px;display:grid;grid-template-columns:repeat(3,1fr);gap:24px;max-width:1100px}
+.hero .sub .b{padding:22px 24px;border:1px solid var(--hairline-2);background:rgba(22,29,49,0.4);backdrop-filter:blur(8px);transition:all .35s var(--ease)}
+.hero .sub .b:hover{border-color:var(--cyan-dim);background:rgba(91,224,255,0.04)}
+.hero .sub .l{font-family:var(--font-mono);font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:var(--paper-fade);margin-bottom:10px}
+.hero .sub .v{font-size:22px;font-weight:600;letter-spacing:-0.015em;color:var(--paper)}
+.hero .sub .v em{font-style:normal;color:var(--cyan)}
+.hero .meta{position:absolute;left:64px;bottom:48px;font-family:var(--font-mono);font-size:11px;letter-spacing:0.2em;text-transform:uppercase;color:var(--paper-fade);display:flex;gap:36px;z-index:3}
+.hero .meta b{color:var(--paper-mute);font-weight:500}
+.gap-grid{display:grid;grid-template-columns:1fr 1fr;gap:40px;margin-top:42px}
+.gap-col{padding:32px;border:1px solid var(--hairline-2);background:rgba(18,24,41,0.5);position:relative;overflow:hidden}
+.gap-col.them{border-color:rgba(255,90,95,0.2)}
+.gap-col.us{border-color:var(--cyan-dim);background:linear-gradient(180deg,rgba(91,224,255,0.04),rgba(22,29,49,0.5))}
+.gap-col .tag{font-family:var(--font-mono);font-size:10px;letter-spacing:0.22em;text-transform:uppercase;color:var(--paper-fade);margin-bottom:18px;display:flex;align-items:center;gap:10px}
+.gap-col.them .tag::before{content:"";width:8px;height:8px;background:var(--red);border-radius:50%}
+.gap-col.us .tag::before{content:"";width:8px;height:8px;background:var(--cyan);border-radius:50%;box-shadow:0 0 10px var(--cyan-glow)}
+.gap-col h3{font-size:24px;font-weight:600;letter-spacing:-0.018em;margin:0 0 18px;line-height:1.2}
+.gap-col .list{display:flex;flex-direction:column;gap:10px;margin-top:8px}
+.gap-col .list .row{padding:11px 0;border-top:1px solid var(--hairline);font-size:13px;color:var(--paper-mute);line-height:1.5}
+.gap-col .list .row:first-child{border-top:0}
+.gap-col .list .row b{color:var(--paper);font-weight:600;letter-spacing:0.01em}
+.gap-col .footnote{margin-top:22px;font-family:var(--font-mono);font-size:11px;letter-spacing:0.04em;color:var(--paper-fade);line-height:1.55}
+.gap-col.us .footnote b{color:var(--cyan);font-weight:500}
+.competitor-row{margin-top:36px;padding-top:24px;border-top:1px solid var(--hairline);display:flex;justify-content:space-between;align-items:center;gap:24px;flex-wrap:wrap}
+.competitor-row .label{font-family:var(--font-mono);font-size:10.5px;letter-spacing:0.22em;text-transform:uppercase;color:var(--paper-fade)}
+.competitor-row .pills{display:flex;gap:10px;flex-wrap:wrap}
+.pill{padding:6px 14px;border:1px solid var(--hairline-2);border-radius:99px;font-family:var(--font-mono);font-size:11px;letter-spacing:0.06em;color:var(--paper-mute)}
+.pill.warn{border-color:rgba(255,90,95,0.3);color:#FF8B8F}
+.why-grid{display:grid;grid-template-columns:1fr 1fr;gap:40px;margin-top:34px}
+.why-col{padding:28px;border:1px solid var(--hairline-2);background:rgba(18,24,41,0.5);position:relative;overflow:hidden}
+.why-col.powi{border-color:var(--cyan-dim);background:linear-gradient(180deg,rgba(91,224,255,0.04),rgba(22,29,49,0.5))}
+.why-col.spark{border-color:var(--amber-dim);background:linear-gradient(180deg,rgba(245,176,39,0.05),rgba(22,29,49,0.5))}
+.why-col .tag{font-family:var(--font-mono);font-size:10px;letter-spacing:0.22em;text-transform:uppercase;color:var(--cyan);margin-bottom:18px;display:flex;align-items:center;gap:10px}
+.why-col.spark .tag{color:var(--amber)}
+.why-col .tag::before{content:"";width:8px;height:8px;background:var(--cyan);border-radius:50%;box-shadow:0 0 10px var(--cyan-glow)}
+.why-col.spark .tag::before{background:var(--amber);box-shadow:0 0 10px var(--amber-glow)}
+.why-col h3{font-size:22px;font-weight:600;letter-spacing:-0.018em;margin:0 0 16px;line-height:1.2;color:var(--paper)}
+.why-col ul{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:0}
+.why-col li{padding:11px 0;border-top:1px solid var(--hairline);font-size:14px;color:var(--paper);line-height:1.5;display:grid;grid-template-columns:18px 1fr;gap:10px}
+.why-col li:first-child{border-top:0}
+.why-col li::before{content:"▸";color:var(--cyan);font-size:12px;line-height:1.55}
+.why-col.spark li::before{color:var(--amber)}
+.why-chain{margin-top:36px;padding:32px 36px;border:1px solid var(--hairline-2);background:linear-gradient(135deg,rgba(91,224,255,0.05),rgba(245,176,39,0.05));position:relative;overflow:hidden}
+.why-chain::before{content:"THE CATEGORY";position:absolute;top:16px;right:20px;font-family:var(--font-mono);font-size:9.5px;letter-spacing:0.3em;color:var(--paper-trace)}
+.why-tagline{margin-top:8px;text-align:center;font-family:var(--font-serif);font-style:italic;font-size:19px;color:var(--paper-mute);letter-spacing:-0.005em}
+.why-tagline b{color:var(--paper);font-style:normal;font-family:var(--font-sans);font-weight:500}
+.chain-viz{margin:4px auto 12px;width:100%;max-width:1080px}
+.chain-viz svg{width:100%;height:auto;display:block;overflow:visible}
+@media (max-width:760px){.chain-viz svg text{font-size:11px}}
+.sys-intro{margin-top:30px;font-family:var(--font-mono);font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:var(--paper-fade);display:flex;justify-content:space-between;align-items:flex-end;gap:30px;flex-wrap:wrap}
+.sys-intro b{color:var(--cyan);font-weight:500}
+.sys-flow{margin-top:28px;display:grid;grid-template-columns:1.1fr 1.1fr 0.8fr 0.8fr 1.1fr;gap:0;align-items:stretch;position:relative}
+.stage{padding:22px 18px 20px;border:1px solid var(--hairline-2);background:rgba(12,17,28,0.7);position:relative;display:flex;flex-direction:column;min-height:380px}
+.stage.has-silicon{border-color:var(--cyan-dim);background:linear-gradient(180deg,rgba(91,224,255,0.05) 0%,rgba(12,17,28,0.7) 60%)}
+.stage.cots{border-color:rgba(139,146,163,0.22);background:rgba(18,24,41,0.45)}
+.stage.antenna{background:rgba(245,176,39,0.04);border-color:rgba(245,176,39,0.18)}
+.stage + .stage{border-left:0}
+.stage::after{content:"";position:absolute;top:48%;right:-9px;width:18px;height:18px;background:var(--ink);border-top:1px solid var(--cyan);border-right:1px solid var(--cyan);transform:rotate(45deg);z-index:3}
+.stage:last-child::after{display:none}
+.stage.cots::after{border-top-color:var(--gray);border-right-color:var(--gray)}
+.stage.antenna.tx::after{border-top-color:var(--amber);border-right-color:var(--amber)}
+.stage.antenna.rx::after{border-top-color:var(--cyan);border-right-color:var(--cyan)}
+.stage .num{font-family:var(--font-mono);font-size:9.5px;letter-spacing:0.22em;color:var(--paper-fade);margin-bottom:4px}
+.stage .name{font-size:16px;font-weight:700;letter-spacing:-0.01em;color:var(--paper);line-height:1.2;margin-bottom:6px}
+.stage .func{font-size:11.5px;color:var(--paper-mute);line-height:1.5;margin-bottom:14px;min-height:48px}
+.stage .powi-tag{font-family:var(--font-mono);font-size:9px;letter-spacing:0.2em;text-transform:uppercase;color:var(--cyan);margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid var(--hairline)}
+.stage.cots .powi-tag{color:var(--gray)}
+.stage.antenna .powi-tag{color:var(--amber)}
+.stage .chips{display:flex;flex-direction:column;gap:10px;margin-top:auto}
+.stage .cots-note{font-family:var(--font-mono);font-size:10.5px;letter-spacing:0.06em;color:var(--paper-mute);line-height:1.6;padding:14px;background:rgba(139,146,163,0.06);border:1px dashed rgba(139,146,163,0.28);margin-top:auto}
+.stage .cots-note b{color:var(--paper);font-weight:500;letter-spacing:0.04em}
+.chip{display:flex;align-items:center;gap:10px;padding:8px;background:rgba(22,29,49,0.6);border:1px solid var(--hairline);transition:all .3s var(--ease)}
+.chip:hover{border-color:var(--cyan-dim);background:rgba(91,224,255,0.05);transform:translateX(2px)}
+.chip-img{width:44px;height:44px;object-fit:contain;flex-shrink:0;background:rgba(0,0,0,0.3);padding:4px;border-radius:2px;filter:drop-shadow(0 0 8px rgba(91,224,255,0.18))}
+.chip-img.placeholder{background:linear-gradient(135deg,rgba(91,224,255,0.15),rgba(245,176,39,0.10));display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-size:8px;letter-spacing:0.08em;color:var(--paper-mute);text-align:center}
+.chip-info{flex:1;min-width:0}
+.chip-info .nm{font-size:11.5px;font-weight:600;color:var(--paper);letter-spacing:-0.005em;line-height:1.2}
+.chip-info .desc{font-family:var(--font-mono);font-size:9.5px;color:var(--paper-fade);letter-spacing:0.04em;margin-top:2px;line-height:1.3}
+.coil{width:64px;height:64px;margin:14px auto 8px;position:relative}
+.coil svg{width:100%;height:100%}
+.air-gap{position:absolute;top:8%;bottom:8%;left:39.5%;right:39.5%;pointer-events:none;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:2}
+.air-gap .wave{position:absolute;border:1px solid var(--amber);border-radius:50%;opacity:0;animation:wave 2.4s ease-out infinite}
+.air-gap .wave:nth-child(2){animation-delay:0.8s}
+.air-gap .wave:nth-child(3){animation-delay:1.6s}
+.air-gap .label{position:absolute;bottom:-30px;font-family:var(--font-mono);font-size:9.5px;letter-spacing:0.24em;text-transform:uppercase;color:var(--amber);background:var(--ink);padding:2px 8px}
+.sys-legend{margin-top:24px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:20px;padding:14px 20px;border:1px solid var(--hairline-2);background:rgba(12,17,28,0.5)}
+.sys-legend .left{display:flex;gap:30px;flex-wrap:wrap}
+.legend-item{display:flex;align-items:center;gap:10px;font-family:var(--font-mono);font-size:10.5px;letter-spacing:0.14em;text-transform:uppercase;color:var(--paper-mute)}
+.legend-swatch{width:24px;height:10px;border:1px solid}
+.legend-swatch.powi{border-color:var(--cyan);background:rgba(91,224,255,0.10)}
+.legend-swatch.spark{border-color:var(--amber);background:rgba(245,176,39,0.10)}
+.legend-swatch.cots{border-color:var(--gray);background:rgba(139,146,163,0.10);border-style:dashed}
+.sys-legend .right{font-family:var(--font-mono);font-size:10.5px;letter-spacing:0.16em;color:var(--paper-fade)}
+.sys-legend .right b{color:var(--cyan);font-weight:500}
+.plat-grid{display:grid;grid-template-columns:1.05fr 1fr;gap:48px;margin-top:36px;align-items:start}
+.plat-stats{display:grid;grid-template-columns:repeat(2,1fr);gap:1px;background:var(--hairline-2);border:1px solid var(--hairline-2)}
+.plat-stat{padding:26px 24px;background:var(--ink-2);position:relative}
+.plat-stat .n{font-size:42px;font-weight:700;letter-spacing:-0.03em;line-height:1;color:var(--paper);font-variant-numeric:tabular-nums;font-family:var(--font-mono)}
+.plat-stat .n .u{font-size:18px;color:var(--cyan);margin-left:4px;font-weight:500}
+.plat-stat .l{font-family:var(--font-mono);font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:var(--paper-fade);margin-top:10px;line-height:1.45}
+.plat-stat .desc{font-size:12px;color:var(--paper-mute);margin-top:8px;line-height:1.5}
+.plat-side h3{font-size:22px;font-weight:600;letter-spacing:-0.018em;margin:0 0 18px;line-height:1.25}
+.plat-side .feature-list{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:0}
+.plat-side .feature-list li{padding:14px 0;border-top:1px solid var(--hairline);display:grid;grid-template-columns:24px 1fr;gap:14px;align-items:start}
+.plat-side .feature-list li:first-child{border-top:0}
+.plat-side .feature-list .chk{color:var(--cyan);font-family:var(--font-mono);font-size:14px;line-height:1.4;letter-spacing:-0.05em}
+.plat-side .feature-list .t{font-size:13.5px;line-height:1.5;color:var(--paper)}
+.plat-side .feature-list .t b{color:var(--cyan);font-weight:600}
+.plat-side .powi-map{margin-top:24px;padding:18px 20px;border:1px dashed var(--cyan-dim);background:rgba(91,224,255,0.03)}
+.plat-side .powi-map .l{font-family:var(--font-mono);font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:var(--cyan);margin-bottom:10px}
+.plat-side .powi-map .t{font-size:13px;color:var(--paper-mute);line-height:1.55}
+.plat-side .powi-map .t b{color:var(--paper);font-weight:600}
+.silicon-banner{margin-top:28px;padding:20px 28px;border:1px solid var(--cyan-dim);background:linear-gradient(90deg,rgba(91,224,255,0.06),rgba(245,176,39,0.06));display:flex;justify-content:space-between;align-items:center;gap:24px;flex-wrap:wrap}
+.silicon-banner .l{font-family:var(--font-mono);font-size:10px;letter-spacing:0.22em;text-transform:uppercase;color:var(--paper-fade)}
+.silicon-banner .v{font-size:22px;font-weight:600;letter-spacing:-0.015em;color:var(--paper);font-family:var(--font-sans)}
+.silicon-banner .v b{color:var(--cyan);font-weight:700}
+.silicon-banner .v em{color:var(--amber);font-style:normal;font-family:var(--font-mono);letter-spacing:0.04em}
+.app-intro{display:flex;justify-content:space-between;align-items:flex-end;gap:40px;flex-wrap:wrap;margin-top:30px}
+.app-intro .left{flex:1 1 520px}
+.app-intro .right{font-family:var(--font-mono);font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:var(--paper-fade);text-align:right}
+.app-intro .right b{color:var(--cyan);font-weight:500;display:block;font-size:14px;letter-spacing:0.06em;text-transform:none;font-family:var(--font-sans);margin-top:4px}
+.app-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:34px}
+.app-card{padding:24px;border:1px solid var(--hairline-2);background:rgba(18,24,41,0.5);transition:all .4s var(--ease);position:relative;overflow:hidden;cursor:default}
+.app-card::before{content:"";position:absolute;left:0;top:0;width:0;height:2px;background:var(--cyan);transition:width .5s var(--ease)}
+.app-card:hover::before{width:100%}
+.app-card:hover{border-color:var(--cyan-dim);transform:translateY(-2px);background:rgba(22,29,49,0.7)}
+.app-card .tag{font-family:var(--font-mono);font-size:9.5px;letter-spacing:0.22em;text-transform:uppercase;color:var(--cyan);margin-bottom:14px}
+.app-card.hot .tag{color:var(--amber)}
+.app-card.hot{border-color:rgba(245,176,39,0.18);background:linear-gradient(180deg,rgba(245,176,39,0.06),rgba(22,29,49,0.5))}
+.app-card h4{font-size:16px;font-weight:600;letter-spacing:-0.012em;margin:0 0 8px;line-height:1.25;color:var(--paper)}
+.app-card p{font-size:12.5px;color:var(--paper-mute);line-height:1.55;margin:0}
+.app-card .meta{margin-top:14px;padding-top:12px;border-top:1px solid var(--hairline);font-family:var(--font-mono);font-size:10px;letter-spacing:0.08em;color:var(--paper-fade)}
+.app-card .meta b{color:var(--paper-mute);font-weight:500}
+.roadmap{margin-top:36px;display:grid;grid-template-columns:repeat(3,1fr);gap:0;border:1px solid var(--hairline-2);position:relative;perspective:1600px}
+.rm.reveal{opacity:0;transform:rotateY(-82deg);transform-origin:left center;transition:opacity .55s var(--ease),transform 1s var(--ease);backface-visibility:hidden}
+.rm.reveal.in{opacity:1;transform:rotateY(0deg)}
+.rm.now.reveal.in{box-shadow:0 0 32px rgba(78,196,145,0.18)}
+.roadmap .rm:nth-child(1) .power{font-size:14px}
+.roadmap .rm:nth-child(2) .power{font-size:20px;font-weight:600;letter-spacing:0.06em;color:var(--cyan);text-shadow:0 0 14px rgba(91,224,255,0.35)}
+.roadmap .rm:nth-child(3) .power{font-size:28px;font-weight:700;letter-spacing:0.04em;color:var(--amber);text-shadow:0 0 24px rgba(245,176,39,0.5)}
+.roadmap .rm:nth-child(1) .silicon li:last-child{font-size:12px;color:var(--cyan);font-weight:600}
+.roadmap .rm:nth-child(2) .silicon li:last-child{font-size:15px;font-weight:700;color:var(--cyan);margin-top:6px;padding-top:6px;border-top:1px dashed rgba(91,224,255,0.25);text-shadow:0 0 10px rgba(91,224,255,0.3)}
+.roadmap .rm:nth-child(3) .silicon li:last-child{font-size:20px;font-weight:700;color:var(--amber);margin-top:8px;padding-top:8px;border-top:1px dashed rgba(245,176,39,0.3);text-shadow:0 0 14px rgba(245,176,39,0.45);letter-spacing:0.01em}
+.roadmap::before{content:"";position:absolute;left:32px;right:32px;top:54px;height:1px;background:linear-gradient(90deg,var(--cyan),var(--amber));opacity:0.5;z-index:0}
+.rm{padding:32px 28px;border-right:1px solid var(--hairline-2);background:var(--ink-2);position:relative;z-index:1}
+.rm:last-child{border-right:0}
+.rm .year{font-family:var(--font-mono);font-size:11px;letter-spacing:0.2em;color:var(--paper-fade);margin-bottom:4px}
+.rm .stage-tag{font-family:var(--font-mono);font-size:10px;letter-spacing:0.22em;text-transform:uppercase;color:var(--cyan);margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.rm.now .stage-tag{color:var(--green)}
+.rm .stage-tag.big{font-size:14px;letter-spacing:0.24em;font-weight:600;margin-bottom:20px;padding:6px 0;text-shadow:0 0 18px rgba(78,196,145,0.5)}
+.rm.now .stage-tag::before{content:"";width:8px;height:8px;background:var(--green);border-radius:50%;box-shadow:0 0 10px rgba(78,196,145,0.45)}
+.rm.future .stage-tag::before{content:"";width:8px;height:8px;background:var(--paper-trace);border-radius:50%;border:1px solid var(--cyan)}
+.rm h3{font-size:32px;font-weight:700;letter-spacing:-0.025em;margin:0 0 4px;line-height:1}
+.rm .power{font-family:var(--font-mono);font-size:13px;color:var(--cyan);letter-spacing:0.08em;margin-bottom:18px}
+.rm .silicon{margin-top:16px;padding:14px 16px;background:rgba(91,224,255,0.05);border-left:2px solid var(--cyan)}
+.rm .silicon .l{font-family:var(--font-mono);font-size:9.5px;letter-spacing:0.2em;text-transform:uppercase;color:var(--cyan);margin-bottom:8px}
+.rm .silicon ul{margin:0;padding-left:14px;list-style:none}
+.rm .silicon li{font-family:var(--font-mono);font-size:11.5px;color:var(--paper);line-height:1.7;letter-spacing:0.02em;position:relative;padding-left:12px}
+.rm .silicon li::before{content:"›";position:absolute;left:-2px;color:var(--cyan)}
+.rm .markets{margin-top:18px;font-size:12px;color:var(--paper-mute);line-height:1.55}
+.rm .markets b{color:var(--paper);font-weight:500;display:block;margin-bottom:6px;font-size:11px;letter-spacing:0.16em;text-transform:uppercase;font-family:var(--font-mono);font-weight:500;color:var(--paper-fade)}
+.precedent-grid{display:grid;grid-template-columns:1.2fr 1fr;gap:48px;margin-top:36px;align-items:center}
+.precedent-main{padding:38px;border:1px solid var(--hairline-2);background:linear-gradient(135deg,rgba(91,224,255,0.04),rgba(245,176,39,0.03));position:relative;overflow:hidden}
+.precedent-main::before{content:"PRECEDENT";position:absolute;top:24px;right:24px;font-family:var(--font-mono);font-size:10px;letter-spacing:0.3em;color:var(--paper-trace)}
+.precedent-main .quote{font-family:var(--font-serif);font-style:italic;font-size:clamp(22px,2.4vw,32px);line-height:1.3;color:var(--paper);font-weight:400;margin:0}
+.precedent-main .quote b{color:var(--cyan);font-style:normal;font-family:var(--font-sans);font-weight:600;letter-spacing:-0.01em}
+.precedent-main .att{margin-top:24px;font-family:var(--font-mono);font-size:11px;letter-spacing:0.16em;text-transform:uppercase;color:var(--paper-fade)}
+.precedent-main .att b{color:var(--cyan);font-weight:500}
+.precedent-stats{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--hairline-2);border:1px solid var(--hairline-2)}
+.precedent-stats .s{padding:24px 22px;background:var(--ink-2)}
+.precedent-stats .s .n{font-size:38px;font-weight:700;letter-spacing:-0.02em;line-height:1;font-variant-numeric:tabular-nums;color:var(--paper);font-family:var(--font-mono)}
+.precedent-stats .s .n em{color:var(--cyan);font-style:normal}
+.precedent-stats .s .l{font-family:var(--font-mono);font-size:10px;letter-spacing:0.16em;text-transform:uppercase;color:var(--paper-fade);margin-top:10px;line-height:1.4}
+.precedent-take{margin-top:30px;font-family:var(--font-serif);font-style:italic;font-size:17px;color:var(--paper-mute);line-height:1.55;max-width:900px}
+.precedent-take b{color:var(--paper);font-style:normal;font-family:var(--font-sans);font-weight:500}
+.fin-grid{display:grid;grid-template-columns:1.4fr 1fr;gap:40px;margin-top:34px;align-items:start}
+.fin-chart{padding:28px;border:1px solid var(--hairline-2);background:rgba(12,17,28,0.7)}
+.chart-head{display:flex;justify-content:space-between;align-items:baseline;font-family:var(--font-mono);font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:var(--paper-fade);margin-bottom:22px;gap:18px;flex-wrap:wrap}
+.chart-head b{color:var(--cyan);font-weight:500;letter-spacing:0.14em}
+.bars{display:flex;flex-direction:column;gap:14px}
+.bar-row{display:grid;grid-template-columns:32px 1fr 96px;gap:14px;align-items:center}
+.bar-label{font-family:var(--font-mono);font-size:11px;letter-spacing:0.1em;color:var(--paper-fade);text-transform:uppercase}
+.bar-track{height:26px;background:rgba(91,224,255,0.04);border:1px solid var(--hairline);position:relative;overflow:hidden}
+.bar-fill{height:100%;background:linear-gradient(90deg,var(--cyan-2),var(--cyan));width:0;transition:width 1.4s var(--ease)}
+.bar-fill.big{background:linear-gradient(90deg,var(--cyan),var(--amber));box-shadow:0 0 18px var(--cyan-glow)}
+.reveal.in .bar-fill{width:var(--w)}
+.bar-val{font-family:var(--font-mono);font-size:14px;font-weight:600;color:var(--paper);text-align:right;letter-spacing:-0.005em;font-variant-numeric:tabular-nums}
+.bar-val.accent{color:var(--cyan);font-size:16px}
+.fin-stats{display:flex;flex-direction:column;gap:14px}
+.fin-stat{padding:24px 26px;border:1px solid var(--cyan-dim);background:linear-gradient(135deg,rgba(91,224,255,0.06),rgba(22,29,49,0.5));position:relative}
+.fin-stat.amber{border-color:var(--amber-dim);background:linear-gradient(135deg,rgba(245,176,39,0.08),rgba(22,29,49,0.5))}
+.fin-stat .fn{font-size:46px;font-weight:700;font-family:var(--font-mono);letter-spacing:-0.028em;line-height:1;color:var(--paper);font-variant-numeric:tabular-nums}
+.fin-stat.amber .fn{color:var(--amber)}
+.fin-stat .fl{font-family:var(--font-mono);font-size:10.5px;letter-spacing:0.18em;text-transform:uppercase;color:var(--paper-fade);margin-top:10px;line-height:1.45}
+.fin-stat .fl b{color:#fff;font-weight:700}
+.unit-strip{margin-top:24px;display:grid;grid-template-columns:repeat(5,1fr);gap:1px;background:var(--hairline-2);border:1px solid var(--hairline-2)}
+.unit-cell{padding:18px 20px;background:var(--ink-2);position:relative;overflow:hidden;opacity:0;transform:translateY(14px);transition:opacity .7s var(--ease),transform .7s var(--ease)}
+.reveal.in .unit-cell:nth-child(1){opacity:1;transform:none;transition-delay:.08s}
+.reveal.in .unit-cell:nth-child(2){opacity:1;transform:none;transition-delay:.18s}
+.reveal.in .unit-cell:nth-child(3){opacity:1;transform:none;transition-delay:.28s}
+.reveal.in .unit-cell:nth-child(4){opacity:1;transform:none;transition-delay:.38s}
+.reveal.in .unit-cell:nth-child(5){opacity:1;transform:none;transition-delay:.48s}
+.unit-cell.amber{background:linear-gradient(180deg,rgba(245,176,39,0.06),var(--ink-2))}
+.unit-cell.amber::after{content:"";position:absolute;top:0;left:-60%;width:50%;height:100%;background:linear-gradient(90deg,transparent,rgba(245,176,39,0.28),transparent);animation:shimmer 4.5s ease-in-out infinite 1.5s}
+.unit-cell .uv{font-size:22px;font-weight:700;letter-spacing:-0.018em;color:var(--paper);font-family:var(--font-mono);font-variant-numeric:tabular-nums;position:relative;z-index:1}
+.unit-cell.amber .uv{color:var(--amber);font-size:18px;letter-spacing:0}
+.unit-cell .ul{font-family:var(--font-mono);font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--paper-fade);margin-top:6px;line-height:1.4;position:relative;z-index:1}
+.fin-foot{margin-top:22px;font-family:var(--font-mono);font-size:11px;letter-spacing:0.04em;color:var(--paper-fade);line-height:1.6}
+.fin-foot b{color:var(--paper);font-weight:500}
+.deal-wrap{margin-top:42px;max-width:880px}
+.deal-aside{padding:36px 40px;border:1px solid var(--amber-dim);background:linear-gradient(180deg,rgba(245,176,39,0.06),rgba(22,29,49,0.5))}
+.deal-aside .heading{font-family:var(--font-mono);font-size:11px;letter-spacing:0.24em;text-transform:uppercase;color:var(--amber);margin-bottom:8px}
+.deal-aside h3{font-size:28px;font-weight:600;letter-spacing:-0.018em;margin:0 0 24px;line-height:1.25;color:var(--paper)}
+.deal-aside .deal-list{list-style:none;padding:0;margin:0}
+.deal-aside .deal-list li{padding:14px 0;border-top:1px solid var(--hairline);display:flex;justify-content:space-between;align-items:baseline;gap:14px;font-size:14px;color:var(--paper-mute);line-height:1.5}
+.deal-aside .deal-list li:first-child{border-top:0}
+.deal-aside .deal-list li .k{font-weight:500;color:var(--paper-fade);font-family:var(--font-mono);font-size:11px;letter-spacing:0.18em;text-transform:uppercase}
+.deal-aside .deal-list li .v{color:var(--paper);font-weight:500;flex-shrink:0;font-family:var(--font-sans);font-size:14px;letter-spacing:-0.005em;text-align:right}
+.deal-aside .deal-list li.accent .v{color:var(--cyan)}
+.deal-aside .deal-list li.amber-row .v{color:var(--amber)}
+.reveal{opacity:0;transform:translateY(28px);transition:opacity .9s var(--ease),transform .9s var(--ease)}
+.reveal.in{opacity:1;transform:none}
+.reveal.d2{transition-delay:.10s}
+.reveal.d3{transition-delay:.20s}
+.reveal.d4{transition-delay:.30s}
+.reveal.d5{transition-delay:.40s}
+.reveal.d6{transition-delay:.50s}
+.reveal.d7{transition-delay:.60s}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.5;transform:scale(0.8)}}
+@keyframes drift{0%{transform:translate(0,0) scale(1)}100%{transform:translate(40px,-30px) scale(1.08)}}
+@keyframes scan{0%{top:0%}100%{top:100%}}
+@keyframes flow{to{stroke-dashoffset:-20}}
+@keyframes wave{0%{width:8px;height:8px;opacity:0.9}100%{width:90px;height:90px;opacity:0}}
+@keyframes coilpulse{0%,100%{opacity:0.55}50%{opacity:1}}
+@keyframes shimmer{0%{left:-60%}100%{left:160%}}
+@media (max-width: 1180px){.sys-flow{grid-template-columns:1fr 1fr;gap:1px}.stage::after{display:none}.air-gap{display:none}}
+@media (max-width: 1100px){.slide{padding:80px 36px 48px}.topbar{padding:14px 24px}.dots{right:14px}.hero .meta{left:24px;font-size:9.5px;gap:20px;flex-wrap:wrap;max-width:90%}.kbhint{left:24px;display:none}.gap-grid,.plat-grid,.precedent-grid,.fin-grid,.why-grid{grid-template-columns:1fr;gap:20px}.roadmap{grid-template-columns:1fr;border:0}.rm{border-right:0;border-bottom:1px solid var(--hairline-2)}.app-grid{grid-template-columns:repeat(2,1fr)}.hero .sub{grid-template-columns:1fr;gap:12px}.hero .sub .b{padding:16px 18px}.roadmap::before{display:none}.unit-strip{grid-template-columns:repeat(2,1fr)}.bar-row{grid-template-columns:28px 1fr 78px}.silicon-banner{flex-direction:column;align-items:flex-start}}
+@media (max-width: 720px){.sys-flow{grid-template-columns:1fr}.slide{padding:72px 22px 40px}.app-grid{grid-template-columns:1fr}.plat-stats,.precedent-stats{grid-template-columns:1fr}.competitor-row{flex-direction:column;align-items:flex-start}.slide h1{font-size:36px}.slide h2{font-size:26px}.hero h1{font-size:42px}.deal-aside .deal-list li{flex-direction:column;align-items:flex-start;gap:4px}.deal-aside .deal-list li .v{text-align:left}}
+@media print{html{scroll-snap-type:none;overflow:visible}body{background:#000;-webkit-print-color-adjust:exact;print-color-adjust:exact}.slide{page-break-after:always;break-after:page;min-height:auto;height:100vh}.topbar,.dots,.kbhint,.hero .scanline{display:none}.reveal{opacity:1;transform:none}.brand .dot,.hero .mesh::before,.hero .mesh::after,.air-gap .wave,.unit-cell.amber::after{animation:none}.hl::before{opacity:.32;transform:scaleX(1)}}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand"><span class="dot"></span><span>Spark Connected <b>↔</b> Power Integrations</span></div>
+  <div class="classifier"><b>CONFIDENTIAL</b> · WORKING DRAFT V4 · MAY 2026</div>
+</header>
+
+<nav class="dots" aria-label="Slide navigation">
+  <a href="#s1" data-label="Open" class="active"></a>
+  <a href="#s2" data-label="The Gap"></a>
+  <a href="#s3" data-label="Why Now"></a>
+  <a href="#s4" data-label="System Map"></a>
+  <a href="#s5" data-label="Platform"></a>
+  <a href="#s6" data-label="Applications"></a>
+  <a href="#s7" data-label="Roadmap"></a>
+  <a href="#s8" data-label="Precedent"></a>
+  <a href="#s9" data-label="Projection"></a>
+  <a href="#s10" data-label="Deal Shape"></a>
+</nav>
+
+<div class="kbhint"><span class="kbkey">↑</span><span class="kbkey">↓</span> · NAVIGATE</div>
+
+<section class="slide hero" id="s1">
+  <div class="mesh"></div><div class="scanline"></div><div class="grid-bg" style="opacity:0.4"></div>
+  <div class="content">
+    <div class="eyebrow reveal">A WIRELESS POWER BUSINESS UNIT — FOR POWI</div>
+    <h1 class="reveal d2">A drop-in wireless charging system for the next class of <span class="hl">Powi silicon</span>.</h1>
+    <div class="sub">
+      <div class="b reveal d4"><div class="l">Format</div><div class="v">Pre-built <em>wireless BU</em></div></div>
+      <div class="b reveal d5"><div class="l">Anchor Asset</div><div class="v">500W Yeti™ Tx + Rx · <em>developed</em></div></div>
+      <div class="b reveal d6"><div class="l">Path</div><div class="v">Technical session → <em>term sheet</em></div></div>
+    </div>
+  </div>
+  <div class="meta">
+    <span><b>Prepared for</b> · Powi SVP Engineering</span>
+    <span><b>Via</b> · Mike Balow, SVP Global Sales</span>
+    <span><b>From</b> · Ruwanga Dassanayake</span>
+  </div>
+</section>
+
+<section class="slide" id="s2">
+  <div class="grid-bg"></div>
+  <div class="content">
+    <div class="eyebrow reveal">02 · THE OPEN LANE</div>
+    <h1 class="reveal d2">Powi ships the silicon.<br>Wireless power needs the <span class="italic-accent">system around it</span>.</h1>
+    <p class="lede reveal d3">Every wireless Tx and Rx today is a hand-rolled OEM board — 9–14 months to qualification. No silicon vendor at Powi's scale ships the systems layer.</p>
+    <div class="gap-grid">
+      <div class="gap-col them reveal d4">
+        <div class="tag">TODAY · WITHOUT A SYSTEMS LAYER</div>
+        <h3>Powi competes at the device layer of a system problem.</h3>
+        <div class="list">
+          <div class="row"><b>Discrete wins only.</b> Powi parts socketed alongside other vendors' control + power stage. No architecture ownership.</div>
+          <div class="row"><b>ASP capped at component level.</b> Zero share of the system-attach revenue the OEM is capturing or paying for.</div>
+          <div class="row"><b>Design cycle owned by the OEM.</b> Powi FAEs absorb integration pain without owning the platform.</div>
+        </div>
+        <div class="competitor-row">
+          <span class="label">Systems players moving in</span>
+          <div class="pills"><span class="pill warn">onsemi</span><span class="pill warn">Infineon</span><span class="pill warn">Renesas</span></div>
+        </div>
+      </div>
+      <div class="gap-col us reveal d5">
+        <div class="tag">WITH A WIRELESS POWER BU</div>
+        <h3>Powi owns the architecture — and pulls its own silicon through both Tx and Rx.</h3>
+        <div class="list">
+          <div class="row"><b>Reference Tx + Rx under Powi brand.</b> 5 system stages — AC-DC, inverter, antenna driver, rectifier, post-rectifier — Powi-silicon-anchored where it matters.</div>
+          <div class="row"><b>Systems-level ASP capture.</b> Sell the platform. Attach Powi silicon by default on both sides of every transaction.</div>
+          <div class="row"><b>Volume engine on the Rx side.</b> 1 Tx pad → N Rx devices. Every robot, humanoid, vehicle, appliance pulls a Powi Rx BOM.</div>
+        </div>
+        <div class="footnote"><b>The architecture and team to seed this</b> already exist — built and validated. The conversation now is which Powi families anchor each stage.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="slide" id="s3">
+  <div class="grid-bg"></div>
+  <div class="content">
+    <div class="eyebrow reveal">03 · WHY NOW · THE CATEGORY REFRAME</div>
+    <h1 class="reveal d2">Everyone sees wireless charging.<br>The real opportunity is <span class="hl">autonomous energy delivery</span>.</h1>
+
+    <div class="why-grid">
+      <div class="why-col powi reveal d3">
+        <div class="tag">POWI DNA ALREADY ALIGNS</div>
+        <h3>The foundation Powi already owns.</h3>
+        <ul>
+          <li>High-margin power systems</li>
+          <li>Industrial power conversion</li>
+          <li>Power architecture credibility</li>
+          <li>Tier-1 industrial channels</li>
+        </ul>
+      </div>
+      <div class="why-col spark reveal d4">
+        <div class="tag">SPARK CLOSES THE GAP</div>
+        <h3>What this BU adds on top.</h3>
+        <ul>
+          <li>Complete wireless power systems layer</li>
+          <li>Differentiated industrial automation capability</li>
+          <li>Faster entry into robotic / autonomous charging</li>
+          <li>Pull-through for Powi silicon content</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="why-chain reveal d5">
+      <div class="chain-viz">
+        <svg viewBox="0 0 1000 250" xmlns="http://www.w3.org/2000/svg" aria-label="Category progression chain">
+          <defs>
+            <linearGradient id="cv-line1" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="#5BE0FF" stop-opacity="0.75"/>
+              <stop offset="100%" stop-color="#F5B027" stop-opacity="0.75"/>
+            </linearGradient>
+            <linearGradient id="cv-line2" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="#F5B027" stop-opacity="0.75"/>
+              <stop offset="100%" stop-color="#E8ECF3" stop-opacity="0.75"/>
+            </linearGradient>
+            <filter id="cv-glow" x="-60%" y="-60%" width="220%" height="220%">
+              <feGaussianBlur stdDeviation="3.2" result="blur"/>
+              <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+            </filter>
+            <radialGradient id="cv-node2" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stop-color="#F5B027" stop-opacity="0.35"/>
+              <stop offset="100%" stop-color="#F5B027" stop-opacity="0"/>
+            </radialGradient>
+          </defs>
+          <line x1="148" y1="110" x2="472" y2="110" stroke="url(#cv-line1)" stroke-width="1.6" stroke-dasharray="3 5" opacity="0.7"/>
+          <line x1="528" y1="110" x2="852" y2="110" stroke="url(#cv-line2)" stroke-width="1.6" stroke-dasharray="3 5" opacity="0.7"/>
+          <circle r="6" fill="#5BE0FF" filter="url(#cv-glow)" opacity="0">
+            <animate attributeName="cx" from="148" to="472" dur="2.8s" repeatCount="indefinite"/>
+            <animate attributeName="cy" from="110" to="110" dur="2.8s" repeatCount="indefinite"/>
+            <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.12;0.88;1" dur="2.8s" repeatCount="indefinite"/>
+          </circle>
+          <circle r="4" fill="#5BE0FF" filter="url(#cv-glow)" opacity="0">
+            <animate attributeName="cx" from="148" to="472" dur="2.8s" begin="1.4s" repeatCount="indefinite"/>
+            <animate attributeName="cy" from="110" to="110" dur="2.8s" begin="1.4s" repeatCount="indefinite"/>
+            <animate attributeName="opacity" values="0;0.7;0.7;0" keyTimes="0;0.12;0.88;1" dur="2.8s" begin="1.4s" repeatCount="indefinite"/>
+          </circle>
+          <circle r="6" fill="#F5B027" filter="url(#cv-glow)" opacity="0">
+            <animate attributeName="cx" from="528" to="852" dur="2.8s" begin="0.6s" repeatCount="indefinite"/>
+            <animate attributeName="cy" from="110" to="110" dur="2.8s" begin="0.6s" repeatCount="indefinite"/>
+            <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.12;0.88;1" dur="2.8s" begin="0.6s" repeatCount="indefinite"/>
+          </circle>
+          <circle r="4" fill="#F5B027" filter="url(#cv-glow)" opacity="0">
+            <animate attributeName="cx" from="528" to="852" dur="2.8s" begin="2.0s" repeatCount="indefinite"/>
+            <animate attributeName="cy" from="110" to="110" dur="2.8s" begin="2.0s" repeatCount="indefinite"/>
+            <animate attributeName="opacity" values="0;0.7;0.7;0" keyTimes="0;0.12;0.88;1" dur="2.8s" begin="2.0s" repeatCount="indefinite"/>
+          </circle>
+          <circle cx="500" cy="110" r="0" fill="none" stroke="#F5B027" stroke-width="1.3" opacity="0">
+            <animate attributeName="r" from="24" to="62" dur="2.6s" repeatCount="indefinite"/>
+            <animate attributeName="opacity" values="0.85;0" keyTimes="0;1" dur="2.6s" repeatCount="indefinite"/>
+          </circle>
+          <circle cx="500" cy="110" r="0" fill="none" stroke="#F5B027" stroke-width="1.3" opacity="0">
+            <animate attributeName="r" from="24" to="62" dur="2.6s" begin="0.87s" repeatCount="indefinite"/>
+            <animate attributeName="opacity" values="0.7;0" keyTimes="0;1" dur="2.6s" begin="0.87s" repeatCount="indefinite"/>
+          </circle>
+          <circle cx="500" cy="110" r="0" fill="none" stroke="#F5B027" stroke-width="1.3" opacity="0">
+            <animate attributeName="r" from="24" to="62" dur="2.6s" begin="1.74s" repeatCount="indefinite"/>
+            <animate attributeName="opacity" values="0.6;0" keyTimes="0;1" dur="2.6s" begin="1.74s" repeatCount="indefinite"/>
+          </circle>
+          <circle cx="120" cy="110" r="40" fill="url(#cv-node2)" opacity="0.6"/>
+          <circle cx="120" cy="110" r="22" fill="#0C111C" stroke="#5BE0FF" stroke-width="2" filter="url(#cv-glow)"/>
+          <circle cx="120" cy="110" r="6" fill="#5BE0FF">
+            <animate attributeName="opacity" values="1;0.5;1" dur="3s" repeatCount="indefinite"/>
+          </circle>
+          <circle cx="500" cy="110" r="28" fill="#0C111C" stroke="#F5B027" stroke-width="2.8" filter="url(#cv-glow)"/>
+          <circle cx="500" cy="110" r="9" fill="#F5B027">
+            <animate attributeName="r" values="9;11;9" dur="2.6s" repeatCount="indefinite"/>
+            <animate attributeName="opacity" values="1;0.7;1" dur="2.6s" repeatCount="indefinite"/>
+          </circle>
+          <circle cx="880" cy="110" r="22" fill="#0C111C" stroke="#E8ECF3" stroke-width="2" filter="url(#cv-glow)"/>
+          <circle cx="880" cy="110" r="6" fill="#E8ECF3">
+            <animate attributeName="opacity" values="1;0.5;1" dur="3s" begin="1s" repeatCount="indefinite"/>
+          </circle>
+          <g font-family="Inter,sans-serif" font-weight="600" letter-spacing="-0.3">
+            <text x="120" y="172" text-anchor="middle" fill="#5BE0FF" font-size="14">Industrial power</text>
+            <text x="120" y="190" text-anchor="middle" fill="#5BE0FF" font-size="14">infrastructure</text>
+            <text x="500" y="172" text-anchor="middle" fill="#F5B027" font-size="16" font-weight="700">Autonomous</text>
+            <text x="500" y="192" text-anchor="middle" fill="#F5B027" font-size="16" font-weight="700">energy delivery</text>
+            <text x="880" y="172" text-anchor="middle" fill="#E8ECF3" font-size="14">Robotics</text>
+            <text x="880" y="190" text-anchor="middle" fill="#E8ECF3" font-size="14">enablement</text>
+          </g>
+          <g font-family="'JetBrains Mono',monospace" font-size="9" letter-spacing="2" fill="rgba(232,236,243,0.42)">
+            <text x="120" y="216" text-anchor="middle">POWI TODAY</text>
+            <text x="500" y="216" text-anchor="middle" fill="rgba(245,176,39,0.6)">WHERE THIS BU PLAYS</text>
+            <text x="880" y="216" text-anchor="middle">WHERE THE WORLD IS GOING</text>
+          </g>
+        </svg>
+      </div>
+      <p class="why-tagline">Same DNA. Bigger category. <b>The window is open now.</b></p>
+    </div>
+  </div>
+</section>
+
+<section class="slide" id="s4">
+  <div class="grid-bg"></div>
+  <div class="content">
+    <div class="eyebrow reveal">04 · THE 5-STAGE WIRELESS POWER SYSTEM</div>
+    <h1 class="reveal d2">Every Yeti has <span class="italic-accent">five system stages</span>. Powi silicon anchors three of them.</h1>
+    <div class="sys-intro reveal d3">
+      <span>YETI™ 500W · POWER FLOW · AC LINE → COIL → AIR → COIL → BATTERY / BUS</span>
+      <span><b>Cyan</b> · Powi silicon anchor &nbsp; · &nbsp; <b style="color:var(--amber)">Amber</b> · Spark systems IP &nbsp; · &nbsp; <b style="color:var(--gray)">Gray</b> · COTS</span>
+    </div>
+    <div class="sys-flow reveal d4">
+      <div class="stage cots">
+        <div class="num">01 · AC-DC FRONT END</div>
+        <div class="name">Power Supply</div>
+        <div class="func">Universal AC input → regulated DC bus. PFC, isolation, EMI.</div>
+        <div class="powi-tag">COTS today · not Spark-designed</div>
+        <div class="cots-note"><b>Purchased off-the-shelf</b> and bundled with Yeti 500W for cost.<br><br>Re-platform to Powi silicon = clean win on slide 5.</div>
+      </div>
+      <div class="stage has-silicon">
+        <div class="num">02 · INVERTER + CONTROL</div>
+        <div class="name">Tx Module</div>
+        <div class="func">DC → high-frequency AC for coil drive. Half / full-bridge resonant, gate drive, MCU, comms, FOD.</div>
+        <div class="powi-tag">Powi silicon · gate + bridge</div>
+        <div class="chips">
+          <div class="chip">
+            <img class="chip-img" src="https://www.power.com/sites/default/files/styles/tile/public/images/products/BridgeSwitch-2_InSOP-L38.png" alt="BridgeSwitch-2" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+            <div class="chip-img placeholder" style="display:none">Bridge</div>
+            <div class="chip-info"><div class="nm">BridgeSwitch-2</div><div class="desc">half-bridge · self-protect</div></div>
+          </div>
+          <div class="chip">
+            <img class="chip-img" src="https://www.power.com/sites/default/files/styles/tile/public/images/products/1SP0335D2S1R_PSD.png" alt="SCALE-2 1SP0335" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+            <div class="chip-img placeholder" style="display:none">SCALE-2</div>
+            <div class="chip-info"><div class="nm">SCALE-2 gate driver</div><div class="desc">high-side · isolated</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="stage antenna tx">
+        <div class="num">03 · COIL + MATCH</div>
+        <div class="name">Tx Antenna</div>
+        <div class="func">Resonant LC, matching network, current sense. Tuned to receiver pair. Thermal-managed.</div>
+        <div class="powi-tag">Spark IP · passive design</div>
+        <div class="coil">
+          <svg viewBox="0 0 64 64">
+            <circle cx="32" cy="32" r="26" fill="none" stroke="var(--amber)" stroke-width="1.4" style="animation:coilpulse 2.2s ease-in-out infinite"/>
+            <circle cx="32" cy="32" r="18" fill="none" stroke="var(--amber)" stroke-width="1.2" opacity="0.7"/>
+            <circle cx="32" cy="32" r="10" fill="none" stroke="var(--amber)" stroke-width="1"/>
+            <circle cx="32" cy="32" r="4" fill="var(--amber)" opacity="0.5"/>
+          </svg>
+        </div>
+        <div class="chips" style="margin-top:8px">
+          <div style="font-family:var(--font-mono);font-size:10px;letter-spacing:0.06em;color:var(--paper-mute);line-height:1.55;padding:8px;background:rgba(245,176,39,0.04);border:1px solid rgba(245,176,39,0.15)">22 patents across the system: implementation, coil topology, FOD partner, comms</div>
+        </div>
+      </div>
+      <div class="stage antenna rx">
+        <div class="num">04 · COIL + RECTIFIER</div>
+        <div class="name">Rx Antenna</div>
+        <div class="func">Resonant pick-up, synchronous rectification, EMI filtering. PowiGaN secondary on high-power variants.</div>
+        <div class="powi-tag">Powi silicon · sync rect</div>
+        <div class="coil">
+          <svg viewBox="0 0 64 64">
+            <circle cx="32" cy="32" r="26" fill="none" stroke="var(--cyan)" stroke-width="1.4" style="animation:coilpulse 2.2s ease-in-out infinite;animation-delay:.6s"/>
+            <circle cx="32" cy="32" r="18" fill="none" stroke="var(--cyan)" stroke-width="1.2" opacity="0.7"/>
+            <circle cx="32" cy="32" r="10" fill="none" stroke="var(--cyan)" stroke-width="1"/>
+            <circle cx="32" cy="32" r="4" fill="var(--cyan)" opacity="0.6"/>
+          </svg>
+        </div>
+        <div class="chips" style="margin-top:8px">
+          <div class="chip">
+            <img class="chip-img" src="https://www.power.com/sites/default/files/styles/tile/public/images/products/topswitchgan-esop-12_0.png" alt="PowiGaN" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+            <div class="chip-img placeholder" style="display:none">PowiGaN</div>
+            <div class="chip-info"><div class="nm">PowiGaN · sync rect</div><div class="desc">low-loss secondary</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="stage has-silicon">
+        <div class="num">05 · POST-RECTIFIER · BMS</div>
+        <div class="name">Rx Module</div>
+        <div class="func">Regulated DC bus → battery charge or motor bus. DC-DC, BMS interface, comms back-channel, OTA.</div>
+        <div class="powi-tag">Powi silicon · volume engine</div>
+        <div class="chips">
+          <div class="chip">
+            <img class="chip-img" src="https://www.power.com/sites/default/files/styles/tile/public/images/products/PI-1600x1200%402x_InnoSwitch3-AQ-InSOP-24D.png" alt="InnoSwitch3-AQ" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+            <div class="chip-img placeholder" style="display:none">InnoSwitch3</div>
+            <div class="chip-info"><div class="nm">InnoSwitch3 / -AQ</div><div class="desc">flyback · auto-qual</div></div>
+          </div>
+          <div class="chip">
+            <img class="chip-img" src="https://www.power.com/sites/default/files/styles/tile/public/images/products/InnoMux2_EP_InSOP-24D_1600x1200.png" alt="InnoMux2-EP" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+            <div class="chip-img placeholder" style="display:none">InnoMux2</div>
+            <div class="chip-info"><div class="nm">InnoMux-2 · TinySwitch</div><div class="desc">multi-output · low-pwr</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="air-gap"><div class="wave"></div><div class="wave"></div><div class="wave"></div><div class="label">Air gap</div></div>
+    </div>
+    <div class="sys-legend reveal d5">
+      <div class="left">
+        <div class="legend-item"><span class="legend-swatch powi"></span> Powi silicon attach · 3 of 5 stages</div>
+        <div class="legend-item"><span class="legend-swatch spark"></span> Spark systems IP · all 5 stages</div>
+        <div class="legend-item"><span class="legend-swatch cots"></span> COTS · re-platform candidate</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="slide" id="s5">
+  <div class="grid-bg"></div>
+  <div class="content">
+    <div class="eyebrow reveal">05 · WHAT ALREADY EXISTS</div>
+    <h1 class="reveal d2">The Yeti™ 500W system.<br>Developed. <span class="italic-accent">Re-platformable to Powi silicon.</span></h1>
+    <div class="plat-grid">
+      <div class="plat-stats reveal d3">
+        <div class="plat-stat"><div class="n" data-count="500"><span style="opacity:.7">~</span>500<span class="u">W</span></div><div class="l">Tx + Rx nominal</div><div class="desc">Industrial class. Headroom to 600W. Roadmap to 1.5kW (Phoenix) and 3kW (Titan).</div></div>
+        <div class="plat-stat"><div class="n" data-count="80">&gt;80<span class="u">%</span></div><div class="l">End-to-end efficiency</div><div class="desc">AC line to load. Headroom to &gt;90% with PowiGaN front-end and sync-rect re-platform.</div></div>
+        <div class="plat-stat"><div class="n" data-count="22">22</div><div class="l">Issued patents</div><div class="desc">Implementation, coil topology, FOD, comms. Clean title · no encumbrances.</div></div>
+        <div class="plat-stat"><div class="n" data-count="3">3</div><div class="l">Spark employees</div><div class="desc">Business · Technologist · FW engineer. Lean transfer. Absorbs into a Powi BU without restructuring.</div></div>
+      </div>
+      <div class="plat-side reveal d4">
+        <h3>What comes with Spark</h3>
+        <ul class="feature-list">
+          <li><span class="chk">▸</span><span class="t"><b>Tx + Rx reference hardware</b> — production-layout boards on both sides, EMI-characterized</span></li>
+          <li><span class="chk">▸</span><span class="t"><b>Pantheon™ firmware</b> — controllers for both ends, multi-protocol, comms back-channel, FOD, thermal, authentication, OTA</span></li>
+          <li><span class="chk">▸</span><span class="t"><b>Standards stack</b> — Ki-style proprietary + industrial multi-standard, paired Tx/Rx protocol</span></li>
+          <li><span class="chk">▸</span><span class="t"><b>Production files</b> — full BOM both sides, mechanicals, test fixtures, FA lab</span></li>
+          <li><span class="chk">▸</span><span class="t"><b>Demos + prototypes</b> — inductive & resonant wireless power technologies, 1W → 100W range</span></li>
+        </ul>
+        <div class="powi-map">
+          <div class="l">POTENTIAL RE-PLATFORM TO POWI SILICON</div>
+          <div class="t">AC-DC front-end migrates to <b>TOPSwitchGaN + HiperPFS</b>. Tx inverter aligns with <b>BridgeSwitch-2 + SCALE-2</b>. Rx sync-rect targets <b>PowiGaN secondary</b>. Rx post-rectifier collapses onto <b>InnoSwitch3 / InnoMux-2</b>. Auto variants slot to <b>InnoSwitch3-AQ</b>. Single PCB respin per side — not a new architecture.</div>
+        </div>
+      </div>
+    </div>
+    <div class="silicon-banner reveal d5">
+      <div class="l">SILICON ATTACH · YETI → PHOENIX → TITAN</div>
+      <div class="v">Every system ship <b>potentially pulls</b> <em>~$40 → $180</em> of Powi silicon.</div>
+    </div>
+  </div>
+</section>
+
+<section class="slide" id="s6">
+  <div class="grid-bg"></div>
+  <div class="content">
+    <div class="eyebrow reveal">06 · WHERE THE PULL ALREADY EXISTS</div>
+    <h1 class="reveal d2">The application set sits <span class="italic-accent">on top of Powi's 2026 narrative</span>.</h1>
+    <div class="app-intro reveal d3">
+      <div class="left"><p class="lede" style="margin-top:0">Wireless docking is the new default for autonomous fleets. Lands directly on Powi's 2026 attack surface — AI data centers, automotive, motor drive.</p></div>
+      <div class="right">Strategic adjacency<br><b>Same silicon families. New attach vector.</b></div>
+    </div>
+    <div class="app-grid">
+      <div class="app-card hot reveal d4"><div class="tag">★ POWI'S 2026 ANCHOR APP</div><h4>AI Data Center Robotics</h4><p>Server-handling, inspection, internal transport. 24/7 uptime, no human contact. Wireless docking maps directly to Powi's AI Data Center positioning.</p><div class="meta"><b>Powi attach:</b> Tx PowiGaN · Rx InnoSwitch3</div></div>
+      <div class="app-card reveal d4"><div class="tag">INDUSTRIAL AUTOMATION</div><h4>AMR · AGV · Manipulators</h4><p>500K+ units shipping annually. Plug-in and contact pads fail at fleet scale. Wireless is the only path that scales.</p><div class="meta"><b>Powi attach:</b> Tx BridgeSwitch-2 · Rx InnoMux-2</div></div>
+      <div class="app-card reveal d4"><div class="tag">HUMANOID ROBOTICS</div><h4>Service · Industrial Humanoids</h4><p>16K → 50K annual shipments 2025 → 2027. None of these systems are designed to dock manually. Wireless is structural.</p><div class="meta"><b>Powi attach:</b> Tx TOPSwitchGaN · Rx InnoSwitch3</div></div>
+      <div class="app-card reveal d5"><div class="tag">MEDICAL DEVICES</div><h4>Mobile Imaging · Smart Beds · WOWs</h4><p>Sealed enclosures, hospital-grade reliability, no exposed connectors. Wireless is standard for new builds.</p><div class="meta"><b>Powi attach:</b> InnoSwitch3 · regulatory headroom</div></div>
+      <div class="app-card reveal d5"><div class="tag">AUTOMOTIVE</div><h4>Light EV · Wireless Charging Pads</h4><p>2-wheel EV, light EV docking, auto-quality wireless. AQ-grade path to Powi automotive customers — Tx pad + Rx vehicle-side.</p><div class="meta"><b>Powi attach:</b> InnoSwitch3-AQ · SCALE EV</div></div>
+      <div class="app-card reveal d5"><div class="tag">TOOLS · APPLIANCES</div><h4>Cordless · Ki Kitchen</h4><p>High-power kitchen (Ki), cordless industrial tools, e-bike charging. Same Tx + Rx architecture, different form factor.</p><div class="meta"><b>Powi attach:</b> InnoSwitch3 · Hiper · MinE-CAP</div></div>
+    </div>
+  </div>
+</section>
+
+<section class="slide" id="s7">
+  <div class="grid-bg"></div>
+  <div class="content">
+    <div class="eyebrow reveal">07 · PLATFORM ROADMAP</div>
+    <h1 class="reveal d2">Three power classes.<br><span class="italic-accent">Same architecture · increasing Powi silicon content on both sides.</span></h1>
+    <div class="roadmap">
+      <div class="rm now reveal d3">
+        <div class="stage-tag big">▸ Developed</div>
+        <h3>Yeti™</h3><div class="power">500 W · Tx + Rx</div>
+        <div class="silicon"><div class="l">Powi silicon — anchor BOM</div><ul><li>Tx: BridgeSwitch-2 ×1</li><li>Tx: SCALE-2 driver</li><li>Rx: InnoSwitch3 ×1 + InnoMux-2</li><li>Total: ~$40 / system</li></ul></div>
+        <div class="markets"><b>Markets</b>AMR · service humanoids · medical workstations · light industrial automation</div>
+      </div>
+      <div class="rm future reveal d4">
+        <div class="year">2027</div><div class="stage-tag">○ Roadmap</div>
+        <h3>Phoenix</h3><div class="power">1.5 kW · Tx + Rx</div>
+        <div class="silicon"><div class="l">Powi silicon — scaled BOM</div><ul><li>Tx: TOPSwitchGaN ×2 + HiperPFS-3</li><li>Tx: BridgeSwitch-2 ×2 + SCALE-2</li><li>Rx: PowiGaN sync-rect + InnoMux-2</li><li>Total: ~$100 / system</li></ul></div>
+        <div class="markets"><b>Markets</b>Heavy automation · AGV · industrial humanoids · data center server maintenance · manipulators</div>
+      </div>
+      <div class="rm future reveal d5">
+        <div class="year">2027+</div><div class="stage-tag">○ Roadmap</div>
+        <h3>Titan</h3><div class="power">3 kW · Tx + Rx</div>
+        <div class="silicon"><div class="l">Powi silicon — peak content</div><ul><li>Tx: 1700V PowiGaN (800VDC arch)</li><li>Tx: HiperPFS-5 + InnoMux-2</li><li>Rx: PowiGaN + InnoSwitch3-AQ</li><li>Total: $122–$182 / system</li></ul></div>
+        <div class="markets"><b>Markets</b>Forklifts · light EV docking · 2-wheel EV · heavy medical · smart hospital beds · automotive wireless pads</div>
+      </div>
+    </div>
+    <p class="precedent-take reveal d6" style="margin-top:32px"><b>The Titan class is where 1700V PowiGaN earns its keep outside the AI data center.</b> Wireless transmitters at 3kW with an 800VDC bus are the natural civilian application for the same silicon Powi is positioning for hyperscaler racks.</p>
+  </div>
+</section>
+
+<section class="slide" id="s8">
+  <div class="grid-bg"></div>
+  <div class="content">
+    <div class="eyebrow reveal">08 · THE PRECEDENT IS ALREADY ON THE BOARD</div>
+    <h1 class="reveal d2">Tesla saw this two years ago.</h1>
+    <div class="precedent-grid">
+      <div class="precedent-main reveal d3">
+        <p class="quote">"Wireless power isn't a feature.<br><b>It's foundational infrastructure</b> for autonomous fleets — and the design problem moved from the receiver to the full Tx + Rx system."</p>
+        <div class="att"><b>READ:</b> Tesla acquires Wiferion · 2023 · $76M · folded into Optimus + factory robotics program</div>
+      </div>
+      <div class="precedent-stats reveal d4">
+        <div class="s"><div class="n">500<em>K+</em></div><div class="l">Autonomous robots shipping annually</div></div>
+        <div class="s"><div class="n">25<em>%</em></div><div class="l">Industrial wireless attach rate by 2027</div></div>
+        <div class="s"><div class="n">1<em>M+</em></div><div class="l">AMR / AGV deployed globally by 2030</div></div>
+        <div class="s"><div class="n">16K<em>→50K</em></div><div class="l">Humanoid shipments 2025 → 2027</div></div>
+      </div>
+    </div>
+    <p class="precedent-take reveal d5"><b>What this validates is design direction, not market size.</b> Tesla — the most vertically integrated autonomous program on earth — decided wireless Tx + Rx infrastructure was important enough to acquire rather than build. The list of companies positioned to catch this wave next is short.</p>
+  </div>
+</section>
+
+<section class="slide" id="s9">
+  <div class="grid-bg"></div>
+  <div class="content">
+    <div class="eyebrow reveal">09 · 5-YEAR BU PROJECTION · <span class="conservative">CONSERVATIVE</span></div>
+    <h1 class="reveal d2">$147M cumulative.<br>$11M+ <span class="italic-accent">Powi silicon pull</span>.</h1>
+    <div class="fin-grid">
+      <div class="fin-chart reveal d3">
+        <div class="chart-head"><span><b>SYSTEM REVENUE</b> · USD · ANNUAL</span><span>YETI 500W ONLY · NO PHOENIX / TITAN / LICENSING UPSIDE</span></div>
+        <div class="bars">
+          <div class="bar-row"><span class="bar-label">Y1</span><div class="bar-track"><div class="bar-fill" style="--w:4.4%"></div></div><span class="bar-val">$2.6M</span></div>
+          <div class="bar-row"><span class="bar-label">Y2</span><div class="bar-track"><div class="bar-fill" style="--w:17.8%"></div></div><span class="bar-val">$10.4M</span></div>
+          <div class="bar-row"><span class="bar-label">Y3</span><div class="bar-track"><div class="bar-fill" style="--w:44.4%"></div></div><span class="bar-val">$26.0M</span></div>
+          <div class="bar-row"><span class="bar-label">Y4</span><div class="bar-track"><div class="bar-fill" style="--w:85.5%"></div></div><span class="bar-val">$50.0M</span></div>
+          <div class="bar-row"><span class="bar-label">Y5</span><div class="bar-track"><div class="bar-fill big" style="--w:100%"></div></div><span class="bar-val accent">$58.5M</span></div>
+        </div>
+      </div>
+      <div class="fin-stats reveal d4">
+        <div class="fin-stat"><div class="fn">$147M</div><div class="fl">5-yr cumulative <b>system</b> revenue</div></div>
+        <div class="fin-stat amber"><div class="fn">$11M+</div><div class="fl">Powi <b>silicon</b> pull · Year 5 alone</div></div>
+        <div class="fin-stat"><div class="fn">7–11×</div><div class="fl">Return on BU seed</div></div>
+      </div>
+    </div>
+    <div class="unit-strip reveal d5">
+      <div class="unit-cell"><div class="uv">$1,300</div><div class="ul">Avg unit price</div></div>
+      <div class="unit-cell"><div class="uv">$455</div><div class="ul">COGS</div></div>
+      <div class="unit-cell"><div class="uv">65%</div><div class="ul">Gross margin</div></div>
+      <div class="unit-cell"><div class="uv">$845</div><div class="ul">GP per unit</div></div>
+      <div class="unit-cell amber"><div class="uv">$40 → $180</div><div class="ul">Powi silicon · Yeti → Titan</div></div>
+    </div>
+    <p class="fin-foot reveal d6">Conservative case. Yeti 500W system sales only. <b>Phoenix 1.5kW · Titan 3kW · licensing revenue · LEV expansion = upside on top.</b></p>
+  </div>
+</section>
+
+<section class="slide" id="s10">
+  <div class="grid-bg"></div>
+  <div class="content">
+    <div class="eyebrow reveal">10 · DEAL SHAPE · ENGINEERING-CLEAN</div>
+    <h1 class="reveal d2">What transfers.<br>What it costs. <span class="italic-accent">What it returns.</span></h1>
+    <div class="deal-wrap reveal d3">
+      <div class="deal-aside">
+        <div class="heading">PRE-BUILT WIRELESS BU · ASSET PACKAGE</div>
+        <h3>The full transfer in one page.</h3>
+        <ul class="deal-list">
+          <li><span class="k">Structure</span><span class="v">Asset purchase</span></li>
+          <li><span class="k">Platform</span><span class="v">Yeti 500W</span></li>
+          <li><span class="k">Firmware</span><span class="v">Pantheon™ stack / source code</span></li>
+          <li><span class="k">IP</span><span class="v">22 issued patents</span></li>
+          <li><span class="k">Team</span><span class="v">3 employees</span></li>
+          <li><span class="k">Roadmap</span><span class="v">Phoenix 1.5kW · Titan 3kW</span></li>
+          <li><span class="k">Encumbrances</span><span class="v">None · clean title</span></li>
+          <li class="accent"><span class="k">Time to Powi-branded</span><span class="v">~6 months post-close</span></li>
+          <li class="amber-row"><span class="k">Silicon attach per system</span><span class="v">$40 → $180+ (Yeti → Titan)</span></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+const io = new IntersectionObserver((entries)=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting){
+      e.target.classList.add('in');
+      const n = e.target.querySelector('[data-count]');
+      if(n && !n.dataset.done){
+        n.dataset.done = '1';
+        const target = parseInt(n.dataset.count,10);
+        const dur = 1100;
+        const start = performance.now();
+        const orig = n.innerHTML;
+        const tick = (now)=>{
+          const t = Math.min(1,(now-start)/dur);
+          const ease = 1 - Math.pow(1-t,3);
+          const cur = Math.floor(target*ease);
+          if(orig.includes('<span')){
+            const prefixMatch = orig.match(/^([^0-9<]*<span[^>]*>[^<]*<\/span>)/);
+            const prefix = prefixMatch ? prefixMatch[0] : '';
+            n.innerHTML = prefix + cur + (orig.match(/<span class="u">[^<]*<\/span>/)?.[0] || '');
+          } else { n.textContent = cur; }
+          if(t<1) requestAnimationFrame(tick); else n.innerHTML = orig;
+        };
+        requestAnimationFrame(tick);
+      }
+    }
+  });
+},{threshold:0.18,rootMargin:'0px 0px -10% 0px'});
+document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+const slides = document.querySelectorAll('.slide');
+const dotEls = document.querySelectorAll('.dots a');
+const so = new IntersectionObserver((entries)=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting){
+      const idx = Array.from(slides).indexOf(e.target);
+      dotEls.forEach(d=>d.classList.remove('active'));
+      if(dotEls[idx]) dotEls[idx].classList.add('active');
+    }
+  });
+},{threshold:0.5});
+slides.forEach(s=>so.observe(s));
+document.addEventListener('keydown',(e)=>{
+  const cur = Array.from(slides).findIndex(s=>{
+    const r = s.getBoundingClientRect();
+    return r.top >= -window.innerHeight*0.4 && r.top <= window.innerHeight*0.4;
+  });
+  if(e.key === 'ArrowDown' || e.key === 'PageDown' || e.key === ' '){e.preventDefault();const next = slides[Math.min(slides.length-1, cur+1)];if(next) next.scrollIntoView({behavior:'smooth'});}
+  if(e.key === 'ArrowUp' || e.key === 'PageUp'){e.preventDefault();const prev = slides[Math.max(0, cur-1)];if(prev) prev.scrollIntoView({behavior:'smooth'});}
+  if(e.key === 'Home'){e.preventDefault();slides[0].scrollIntoView({behavior:'smooth'})}
+  if(e.key === 'End'){e.preventDefault();slides[slides.length-1].scrollIntoView({behavior:'smooth'})}
+});
+</script>
+</body>
+</html>

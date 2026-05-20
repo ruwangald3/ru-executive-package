@@ -1,0 +1,11 @@
+DEPLOYMENT NOTES — powi-wireless-bu-v4 / v1
+================================================================
+artifact:     powi-wireless-bu-v4
+version:      v1
+project:      ru-executive-package
+github repo:  https://github.com/ruwangald3/ru-executive-package
+deploy mode:  github-webhook (Vercel)
+
+One-time Vercel setup (if new project):
+  vercel.com/new -> import ruwangald3/ru-executive-package
+  Root Directory: artifacts/powi-wireless-bu-v4/versions/v1
